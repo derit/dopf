@@ -29,25 +29,31 @@ begin
     con.Connect;
 
     qry.SQL.Text := 'delete from person';
-    qry.Execute.Apply;
+    qry.Execute;
+    qry.Apply;
 
     qry.SQL.Text := 'insert into person (id, name) values (:id, :name)';
     qry.Entity.Id := 1;
     qry.Entity.Name := 'Silvio';
-    qry.SetParams.Execute;
+    qry.SetParams;
+    qry.Execute;
     qry.Entity.Id := 2;
     qry.Entity.Name := 'Waldir';
-    qry.SetParams.Execute.Apply;
+    qry.SetParams;
+    qry.Execute;
+    qry.Apply;
 
     qry.SQL.Text := 'select id, name from person';
-    qry.Open.First;
+    qry.Open;
+    qry.First;
     while not qry.EOF do
     begin
       qry.GetFields;
       WriteLn('Record: ', qry.Entity.id, ', ', qry.Entity.Name);
       qry.Next;
     end;
-    qry.Open.Apply;
+    qry.Open;
+    qry.Apply;
 
     ReadLn;
   finally

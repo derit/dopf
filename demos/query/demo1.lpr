@@ -29,7 +29,8 @@ begin
     con.Connect;
 
     qry.SQL.Text := 'delete from person';
-    qry.Execute.Apply;
+    qry.Execute;
+    qry.Apply;
 
     qry.SQL.Text := 'insert into person (id, name) values (:id, :name)';
     per.Id := 1;
@@ -39,19 +40,23 @@ begin
     per.Id := 2;
     per.Name := 'Waldir';
     dUtils.dSetParams(per, qry.Params);
-    qry.Execute.Apply;
+    qry.Execute;
+    qry.Apply;
 
     qry.SQL.Text := 'select id, name from person';
-    qry.Open.First;
+    qry.Open;
+    qry.First;
     while not qry.EOF do
     begin
       dUtils.dGetFields(per, qry.Fields);
       WriteLn('Record: ', per.id, ', ', per.Name);
       qry.Next;
     end;
-    qry.Open.Apply;
+    qry.Open;
+    qry.Apply;
 
-    qry.Open.First;
+    qry.Open;
+    qry.First;
     b := Now;
     for i := 1 to 1000000 do
     begin

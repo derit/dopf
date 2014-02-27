@@ -47,13 +47,13 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
-    function Connect: TdConnectionBroker; override;
-    function Disconnect: TdConnectionBroker; override;
-    function StartTransaction: TdConnectionBroker; override;
-    function Commit: TdConnectionBroker; override;
-    function CommitRetaining: TdConnectionBroker; override;
-    function Rollback: TdConnectionBroker; override;
-    function RollbackRetaining: TdConnectionBroker; override;
+    procedure Connect; override;
+    procedure Disconnect; override;
+    procedure StartTransaction; override;
+    procedure Commit; override;
+    procedure CommitRetaining; override;
+    procedure Rollback; override;
+    procedure RollbackRetaining; override;
     function InTransaction: Boolean; override;
   end;
 
@@ -89,26 +89,26 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
-    function ApplyUpdates: TdQueryBroker; override;
-    function CancelUpdates: TdQueryBroker; override;
-    function Apply: TdQueryBroker; override;
-    function ApplyRetaining: TdQueryBroker; override;
-    function Undo: TdQueryBroker; override;
-    function UndoRetaining: TdQueryBroker; override;
-    function Append: TdQueryBroker; override;
-    function Insert: TdQueryBroker; override;
-    function Edit: TdQueryBroker; override;
-    function Cancel: TdQueryBroker; override;
-    function Delete: TdQueryBroker; override;
-    function Open: TdQueryBroker; override;
-    function Close: TdQueryBroker; override;
-    function Refresh: TdQueryBroker; override;
-    function First: TdQueryBroker; override;
-    function Prior: TdQueryBroker; override;
-    function Next: TdQueryBroker; override;
-    function Last: TdQueryBroker; override;
-    function Post: TdQueryBroker; override;
-    function Execute: TdQueryBroker; override;
+    procedure ApplyUpdates; override;
+    procedure CancelUpdates; override;
+    procedure Apply; override;
+    procedure ApplyRetaining; override;
+    procedure Undo; override;
+    procedure UndoRetaining; override;
+    procedure Append; override;
+    procedure Insert; override;
+    procedure Edit; override;
+    procedure Cancel; override;
+    procedure Delete; override;
+    procedure Open; override;
+    procedure Close; override;
+    procedure Refresh; override;
+    procedure First; override;
+    procedure Prior; override;
+    procedure Next; override;
+    procedure Last; override;
+    procedure Post; override;
+    procedure Execute; override;
     function RowsAffected: Int64; override;
     function Locate(const AKeyFields: string;const AKeyValues: Variant;
       const AOptions: TLocateOptions = []): Boolean; override;
@@ -147,45 +147,38 @@ begin
   inherited Destroy;
 end;
 
-function TdSQLdbConnectionBroker.Connect: TdConnectionBroker;
+procedure TdSQLdbConnectionBroker.Connect;
 begin
-  Result := Self;
   FCon.Connected := True;
 end;
 
-function TdSQLdbConnectionBroker.Disconnect: TdConnectionBroker;
+procedure TdSQLdbConnectionBroker.Disconnect;
 begin
-  Result := Self;
   FCon.Connected := False;
 end;
 
-function TdSQLdbConnectionBroker.StartTransaction: TdConnectionBroker;
+procedure TdSQLdbConnectionBroker.StartTransaction;
 begin
-  Result := Self;
   FCon.Transaction.StartTransaction;
 end;
 
-function TdSQLdbConnectionBroker.Commit: TdConnectionBroker;
+procedure TdSQLdbConnectionBroker.Commit;
 begin
-  Result := Self;
   FCon.Transaction.Commit;
 end;
 
-function TdSQLdbConnectionBroker.CommitRetaining: TdConnectionBroker;
+procedure TdSQLdbConnectionBroker.CommitRetaining;
 begin
-  Result := Self;
   FCon.Transaction.CommitRetaining;
 end;
 
-function TdSQLdbConnectionBroker.Rollback: TdConnectionBroker;
+procedure TdSQLdbConnectionBroker.Rollback;
 begin
-  Result := nil;
   FCon.Transaction.Rollback;
 end;
 
-function TdSQLdbConnectionBroker.RollbackRetaining: TdConnectionBroker;
+procedure TdSQLdbConnectionBroker.RollbackRetaining;
 begin
-  Result := Self;
   FCon.Transaction.RollbackRetaining;
 end;
 
@@ -384,21 +377,18 @@ begin
   FQuery.RecNo := AValue;
 end;
 
-function TdSQLdbQueryBroker.ApplyUpdates: TdQueryBroker;
+procedure TdSQLdbQueryBroker.ApplyUpdates;
 begin
-  Result := Self;
   FQuery.ApplyUpdates(0);
 end;
 
-function TdSQLdbQueryBroker.CancelUpdates: TdQueryBroker;
+procedure TdSQLdbQueryBroker.CancelUpdates;
 begin
-  Result := Self;
   FQuery.CancelUpdates;
 end;
 
-function TdSQLdbQueryBroker.Apply: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Apply;
 begin
-  Result := Self;
   if Assigned(FCon) and FCon.Transaction.Active then
     try
       if FQuery.Modified then
@@ -410,9 +400,8 @@ begin
     end;
 end;
 
-function TdSQLdbQueryBroker.ApplyRetaining: TdQueryBroker;
+procedure TdSQLdbQueryBroker.ApplyRetaining;
 begin
-  Result := Self;
   if Assigned(FCon) and FCon.Transaction.Active then
   try
     if FQuery.Modified then
@@ -424,9 +413,8 @@ begin
   end;
 end;
 
-function TdSQLdbQueryBroker.Undo: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Undo;
 begin
-  Result := Self;
   if Assigned(FCon) and FCon.Transaction.Active then
   begin
     if FQuery.Modified then
@@ -435,9 +423,8 @@ begin
   end;
 end;
 
-function TdSQLdbQueryBroker.UndoRetaining: TdQueryBroker;
+procedure TdSQLdbQueryBroker.UndoRetaining;
 begin
-  Result := Self;
   if Assigned(FCon) and FCon.Transaction.Active then
   begin
     if FQuery.Modified then
@@ -446,87 +433,73 @@ begin
   end;
 end;
 
-function TdSQLdbQueryBroker.Append: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Append;
 begin
-  Result := Self;
   FQuery.Append;
 end;
 
-function TdSQLdbQueryBroker.Insert: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Insert;
 begin
-  Result := Self;
   FQuery.Insert;
 end;
 
-function TdSQLdbQueryBroker.Edit: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Edit;
 begin
-  Result := Self;
   FQuery.Edit;
 end;
 
-function TdSQLdbQueryBroker.Cancel: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Cancel;
 begin
-  Result := Self;
   FQuery.Cancel;
 end;
 
-function TdSQLdbQueryBroker.Delete: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Delete;
 begin
-  Result := Self;
   FQuery.Delete;
 end;
 
-function TdSQLdbQueryBroker.Open: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Open;
 begin
-  Result := Self;
   FQuery.Open;
 end;
 
-function TdSQLdbQueryBroker.Close: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Close;
 begin
-  Result := Self;
   FQuery.Close;
 end;
 
-function TdSQLdbQueryBroker.Refresh: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Refresh;
 begin
-  Result := Self;
   FQuery.Refresh;
 end;
 
-function TdSQLdbQueryBroker.First: TdQueryBroker;
+procedure TdSQLdbQueryBroker.First;
 begin
-  Result := Self;
   FQuery.First;
 end;
 
-function TdSQLdbQueryBroker.Prior: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Prior;
 begin
-  Result := Self;
   FQuery.Prior;
 end;
 
-function TdSQLdbQueryBroker.Next: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Next;
 begin
-  Result := Self;
   FQuery.Next;
 end;
 
-function TdSQLdbQueryBroker.Last: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Last;
 begin
-  Result := Self;
   FQuery.Last;
 end;
 
-function TdSQLdbQueryBroker.Post: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Post;
 begin
-  Result := Self;
   FQuery.Post;
 end;
 
-function TdSQLdbQueryBroker.Execute: TdQueryBroker;
+procedure TdSQLdbQueryBroker.Execute;
 begin
-  Result := Self;
   FQuery.ExecSQL;
 end;
 

@@ -78,13 +78,13 @@ type
     procedure SetUser({%H-}const AValue: string); virtual;
   public
     constructor Create; virtual;
-    function Connect: TdConnectionBroker; virtual;
-    function Disconnect: TdConnectionBroker; virtual;
-    function StartTransaction: TdConnectionBroker; virtual;
-    function Commit: TdConnectionBroker; virtual;
-    function CommitRetaining: TdConnectionBroker; virtual;
-    function Rollback: TdConnectionBroker; virtual;
-    function RollbackRetaining: TdConnectionBroker; virtual;
+    procedure Connect; virtual;
+    procedure Disconnect; virtual;
+    procedure StartTransaction; virtual;
+    procedure Commit; virtual;
+    procedure CommitRetaining; virtual;
+    procedure Rollback; virtual;
+    procedure RollbackRetaining; virtual;
     function InTransaction: Boolean; virtual;
     property Connection: TObject read GetConnection;
     property Transaction: TObject read GetTransaction;
@@ -125,13 +125,13 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function Connect: T1;
-    function Disconnect: T1;
-    function StartTransaction: T1;
-    function Commit: T1;
-    function CommitRetaining: T1;
-    function Rollback: T1;
-    function RollbackRetaining: T1;
+    procedure Connect;
+    procedure Disconnect;
+    procedure StartTransaction;
+    procedure Commit;
+    procedure CommitRetaining;
+    procedure Rollback;
+    procedure RollbackRetaining;
     function InTransaction: Boolean;
     property Broker: T1 read FBroker write FBroker;
     property Logger: T2 read FLogger write FLogger;
@@ -168,26 +168,26 @@ type
     procedure SetPosition({%H-}const AValue: Int64); virtual;
   public
     constructor Create; virtual;
-    function ApplyUpdates: TdQueryBroker; virtual;
-    function CancelUpdates: TdQueryBroker; virtual;
-    function Apply: TdQueryBroker; virtual;
-    function ApplyRetaining: TdQueryBroker; virtual;
-    function Undo: TdQueryBroker; virtual;
-    function UndoRetaining: TdQueryBroker; virtual;
-    function Append: TdQueryBroker; virtual;
-    function Insert: TdQueryBroker; virtual;
-    function Edit: TdQueryBroker; virtual;
-    function Cancel: TdQueryBroker; virtual;
-    function Delete: TdQueryBroker; virtual;
-    function Open: TdQueryBroker; virtual;
-    function Close: TdQueryBroker; virtual;
-    function Refresh: TdQueryBroker; virtual;
-    function First: TdQueryBroker; virtual;
-    function Prior: TdQueryBroker; virtual;
-    function Next: TdQueryBroker; virtual;
-    function Last: TdQueryBroker; virtual;
-    function Post: TdQueryBroker; virtual;
-    function Execute: TdQueryBroker; virtual;
+    procedure ApplyUpdates; virtual;
+    procedure CancelUpdates; virtual;
+    procedure Apply; virtual;
+    procedure ApplyRetaining; virtual;
+    procedure Undo; virtual;
+    procedure UndoRetaining; virtual;
+    procedure Append; virtual;
+    procedure Insert; virtual;
+    procedure Edit; virtual;
+    procedure Cancel; virtual;
+    procedure Delete; virtual;
+    procedure Open; virtual;
+    procedure Close; virtual;
+    procedure Refresh; virtual;
+    procedure First; virtual;
+    procedure Prior; virtual;
+    procedure Next; virtual;
+    procedure Last; virtual;
+    procedure Post; virtual;
+    procedure Execute; virtual;
     function RowsAffected: Int64; virtual;
     function Locate({%H-}const AKeyFields: string;{%H-}const AKeyValues: Variant;
       {%H-}const AOptions: TLocateOptions = []): Boolean; virtual;
@@ -242,26 +242,26 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function ApplyUpdates: T1;
-    function CancelUpdates: T1;
-    function Apply: T1;
-    function ApplyRetaining: T1;
-    function Undo: T1;
-    function UndoRetaining: T1;
-    function Append: T1;
-    function Insert: T1;
-    function Edit: T1;
-    function Cancel: T1;
-    function Delete: T1;
-    function Open: T1;
-    function Close: T1;
-    function Refresh: T1;
-    function First: T1;
-    function Prior: T1;
-    function Next: T1;
-    function Last: T1;
-    function Post: T1;
-    function Execute: T1;
+    procedure ApplyUpdates;
+    procedure CancelUpdates;
+    procedure Apply;
+    procedure ApplyRetaining;
+    procedure Undo;
+    procedure UndoRetaining;
+    procedure Append;
+    procedure Insert;
+    procedure Edit;
+    procedure Cancel;
+    procedure Delete;
+    procedure Open;
+    procedure Close;
+    procedure Refresh;
+    procedure First;
+    procedure Prior;
+    procedure Next;
+    procedure Last;
+    procedure Post;
+    procedure Execute;
     function RowsAffected: Int64;
     function Locate({%H-}const AKeyFields: string;{%H-}const AKeyValues: Variant;
       {%H-}const AOptions: TLocateOptions = []): Boolean;
@@ -299,10 +299,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function GetFields: T1;
-    function SetFields: T1;
-    function GetParams: T1;
-    function SetParams: T1;
+    procedure GetFields;
+    procedure SetFields;
+    procedure GetParams;
+    procedure SetParams;
     property Entity: T3 read FEntity write FEntity;
   end;
 
@@ -385,45 +385,38 @@ begin
   inherited Create;
 end;
 
-function TdConnectionBroker.Connect: TdConnectionBroker;
+procedure TdConnectionBroker.Connect;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionBroker.Disconnect: TdConnectionBroker;
+procedure TdConnectionBroker.Disconnect;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionBroker.StartTransaction: TdConnectionBroker;
+procedure TdConnectionBroker.StartTransaction;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionBroker.Commit: TdConnectionBroker;
+procedure TdConnectionBroker.Commit;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionBroker.CommitRetaining: TdConnectionBroker;
+procedure TdConnectionBroker.CommitRetaining;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionBroker.Rollback: TdConnectionBroker;
+procedure TdConnectionBroker.Rollback;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionBroker.RollbackRetaining: TdConnectionBroker;
+procedure TdConnectionBroker.RollbackRetaining;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
@@ -642,54 +635,47 @@ begin
   FBroker.User := AValue;
 end;
 
-function TdConnection.Connect: T1;
+procedure TdConnection.Connect;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Connect;
 end;
 
-function TdConnection.Disconnect: T1;
+procedure TdConnection.Disconnect;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Disconnect;
 end;
 
-function TdConnection.StartTransaction: T1;
+procedure TdConnection.StartTransaction;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.StartTransaction;
 end;
 
-function TdConnection.Commit: T1;
+procedure TdConnection.Commit;
 begin
-  Result := FBroker;
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.Commit');
   FBroker.Commit;
 end;
 
-function TdConnection.CommitRetaining: T1;
+procedure TdConnection.CommitRetaining;
 begin
-  Result := FBroker;
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.CommitRetaining');
   FBroker.CommitRetaining;
 end;
 
-function TdConnection.Rollback: T1;
+procedure TdConnection.Rollback;
 begin
-  Result := FBroker;
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.Rollback');
   FBroker.Rollback;
 end;
 
-function TdConnection.RollbackRetaining: T1;
+procedure TdConnection.RollbackRetaining;
 begin
-  Result := FBroker;
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.RollbackRetaining');
   FBroker.RollbackRetaining;
@@ -708,123 +694,103 @@ begin
   inherited Create;
 end;
 
-function TdQueryBroker.ApplyUpdates: TdQueryBroker;
+procedure TdQueryBroker.ApplyUpdates;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.CancelUpdates: TdQueryBroker;
+procedure TdQueryBroker.CancelUpdates;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Apply: TdQueryBroker;
+procedure TdQueryBroker.Apply;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.ApplyRetaining: TdQueryBroker;
+procedure TdQueryBroker.ApplyRetaining;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Undo: TdQueryBroker;
+procedure TdQueryBroker.Undo;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.UndoRetaining: TdQueryBroker;
+procedure TdQueryBroker.UndoRetaining;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Append: TdQueryBroker;
+procedure TdQueryBroker.Append;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Insert: TdQueryBroker;
+procedure TdQueryBroker.Insert;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Edit: TdQueryBroker;
+procedure TdQueryBroker.Edit;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Cancel: TdQueryBroker;
+procedure TdQueryBroker.Cancel;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Delete: TdQueryBroker;
+procedure TdQueryBroker.Delete;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Open: TdQueryBroker;
+procedure TdQueryBroker.Open;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Close: TdQueryBroker;
+procedure TdQueryBroker.Close;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Refresh: TdQueryBroker;
+procedure TdQueryBroker.Refresh;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.First: TdQueryBroker;
+procedure TdQueryBroker.First;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Prior: TdQueryBroker;
+procedure TdQueryBroker.Prior;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Next: TdQueryBroker;
+procedure TdQueryBroker.Next;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Last: TdQueryBroker;
+procedure TdQueryBroker.Last;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Post: TdQueryBroker;
+procedure TdQueryBroker.Post;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryBroker.Execute: TdQueryBroker;
+procedure TdQueryBroker.Execute;
 begin
-  Result := nil;
   NotImplementedError;
 end;
 
@@ -1100,158 +1066,138 @@ begin
   FBroker.Position := AValue;
 end;
 
-function TdQuery.ApplyUpdates: T1;
+procedure TdQuery.ApplyUpdates;
 begin
-  Result := FBroker;
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.ApplyUpdates');
   FBroker.ApplyUpdates;
 end;
 
-function TdQuery.CancelUpdates: T1;
+procedure TdQuery.CancelUpdates;
 begin
-  Result := FBroker;
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.CancelUpdates');
   FBroker.CancelUpdates;
 end;
 
-function TdQuery.Apply: T1;
+procedure TdQuery.Apply;
 begin
-  Result := FBroker;
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.Apply');
   FBroker.Apply;
 end;
 
-function TdQuery.ApplyRetaining: T1;
+procedure TdQuery.ApplyRetaining;
 begin
-  Result := FBroker;
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.ApplyRetaining');
   FBroker.ApplyRetaining;
 end;
 
-function TdQuery.Undo: T1;
+procedure TdQuery.Undo;
 begin
-  Result := FBroker;
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.Undo');
   FBroker.Undo;
 end;
 
-function TdQuery.UndoRetaining: T1;
+procedure TdQuery.UndoRetaining;
 begin
-  Result := FBroker;
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.UndoRetaining');
   FBroker.UndoRetaining;
 end;
 
-function TdQuery.Append: T1;
+procedure TdQuery.Append;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Append;
 end;
 
-function TdQuery.Insert: T1;
+procedure TdQuery.Insert;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Insert;
 end;
 
-function TdQuery.Edit: T1;
+procedure TdQuery.Edit;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Edit;
 end;
 
-function TdQuery.Cancel: T1;
+procedure TdQuery.Cancel;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Cancel;
 end;
 
-function TdQuery.Delete: T1;
+procedure TdQuery.Delete;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Delete;
 end;
 
-function TdQuery.Open: T1;
+procedure TdQuery.Open;
 begin
-  Result := FBroker;
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltSQL, Trim(SQL.Text));
   FBroker.Open;
 end;
 
-function TdQuery.Close: T1;
+procedure TdQuery.Close;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Close;
 end;
 
-function TdQuery.Refresh: T1;
+procedure TdQuery.Refresh;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Refresh;
 end;
 
-function TdQuery.First: T1;
+procedure TdQuery.First;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.First;
 end;
 
-function TdQuery.Prior: T1;
+procedure TdQuery.Prior;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Prior;
 end;
 
-function TdQuery.Next: T1;
+procedure TdQuery.Next;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Next;
 end;
 
-function TdQuery.Last: T1;
+procedure TdQuery.Last;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Last;
 end;
 
-function TdQuery.Post: T1;
+procedure TdQuery.Post;
 begin
-  Result := FBroker;
   CheckBroker;
   FBroker.Post;
 end;
 
-function TdQuery.Execute: T1;
+procedure TdQuery.Execute;
 var
   S: string;
 begin
-  Result := FBroker;
   CheckBroker;
   CheckConnection;
   S := Trim(SQL.Text);
@@ -1333,30 +1279,26 @@ begin
   FreeAndNil(FEntity);
 end;
 
-function TdEntityQuery.GetFields: T1;
+procedure TdEntityQuery.GetFields;
 begin
-  Result := Broker;
   Connection.Logger.Log(ltCustom, 'Trying Query.GetFields');
   dGetFields(FEntity, Fields);
 end;
 
-function TdEntityQuery.SetFields: T1;
+procedure TdEntityQuery.SetFields;
 begin
-  Result := Broker;
   Connection.Logger.Log(ltCustom, 'Trying Query.SetFields');
   dSetFields(FEntity, Fields);
 end;
 
-function TdEntityQuery.GetParams: T1;
+procedure TdEntityQuery.GetParams;
 begin
-  Result := Broker;
   Connection.Logger.Log(ltCustom, 'Trying Query.GetParams');
   dGetParams(FEntity, Params);
 end;
 
-function TdEntityQuery.SetParams: T1;
+procedure TdEntityQuery.SetParams;
 begin
-  Result := Broker;
   Connection.Logger.Log(ltCustom, 'Trying Query.SetParams');
   dSetParams(FEntity, Params);
 end;
