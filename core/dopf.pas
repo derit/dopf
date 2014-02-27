@@ -18,14 +18,14 @@ unit dOPF;
 interface
 
 uses
-  dUtils, Classes, SysUtils, DB;
+  dClasses, dUtils, Classes, SysUtils, DB;
 
 type
-  EdNotImplemented = class(Exception);
+  EdNotImplemented = class(EdException);
 
-  EdConnection = class(Exception);
+  EdConnection = class(EdException);
 
-  EdQuery = class(Exception);
+  EdQuery = class(EdException);
 
   TdLogType = (ltTransaction, ltSQL, ltCustom);
 
@@ -35,7 +35,7 @@ type
 
   { TdLogger }
 
-  TdLogger = class(TObject)
+  TdLogger = class(TdObject)
   private
     FActive: Boolean;
     FFileName: TFileName;
@@ -58,7 +58,7 @@ type
 
   { TdConnectionBroker }
 
-  TdConnectionBroker = class(TObject)
+  TdConnectionBroker = class(TdObject)
   protected
     function GetConnection: TObject; virtual;
     function GetTransaction: TObject; virtual;
@@ -100,7 +100,7 @@ type
 
   { TdConnection }
 
-  generic TdConnection<T1, T2> = class(TComponent)
+  generic TdConnection<T1, T2> = class(TdComponent)
   private
     FBroker: T1;
     FLogger: T2;
@@ -147,7 +147,7 @@ type
 
   { TdQueryBroker }
 
-  TdQueryBroker = class(TObject)
+  TdQueryBroker = class(TdObject)
   protected
     function GetActive: Boolean; virtual;
     function GetBOF: Boolean; virtual;
@@ -216,7 +216,7 @@ type
 
   { TdQuery }
 
-  generic TdQuery<T1, T2> = class(TComponent)
+  generic TdQuery<T1, T2> = class(TdComponent)
   private
     FBroker: T1;
     FConnection: T2;
