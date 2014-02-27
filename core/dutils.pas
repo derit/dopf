@@ -20,15 +20,15 @@ interface
 uses
   DB, SysUtils, TypInfo;
 
-procedure GetParameterizeSQL(var ASQL: string; AParams: TParams);
-procedure GetFields(AObject: TObject; AFields: TFields);
-procedure GetParams(AObject: TObject; AParams: TParams);
-procedure SetFields(AObject: TObject; AFields: TFields);
-procedure SetParams(AObject: TObject; AParams: TParams);
+procedure dParameterizeSQL(var ASQL: string; AParams: TParams);
+procedure dGetFields(AObject: TObject; AFields: TFields);
+procedure dGetParams(AObject: TObject; AParams: TParams);
+procedure dSetFields(AObject: TObject; AFields: TFields);
+procedure dSetParams(AObject: TObject; AParams: TParams);
 
 implementation
 
-procedure GetParameterizeSQL(var ASQL: string; AParams: TParams);
+procedure dParameterizeSQL(var ASQL: string; AParams: TParams);
 var
   V: string;
   I: Integer;
@@ -47,7 +47,7 @@ begin
   end;
 end;
 
-procedure GetFields(AObject: TObject; AFields: TFields);
+procedure dGetFields(AObject: TObject; AFields: TFields);
 var
   I: Integer;
   F: TField;
@@ -72,7 +72,7 @@ begin
   end;
 end;
 
-procedure GetParams(AObject: TObject; AParams: TParams);
+procedure dGetParams(AObject: TObject; AParams: TParams);
 var
   I: Integer;
   P: TParam;
@@ -97,7 +97,7 @@ begin
   end;
 end;
 
-procedure SetFields(AObject: TObject; AFields: TFields);
+procedure dSetFields(AObject: TObject; AFields: TFields);
 var
   C, I: Integer;
   F: TField;
@@ -129,7 +129,7 @@ begin
     end;
 end;
 
-procedure SetParams(AObject: TObject; AParams: TParams);
+procedure dSetParams(AObject: TObject; AParams: TParams);
 var
   C, I: Integer;
   P: TParam;

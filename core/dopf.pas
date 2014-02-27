@@ -1237,7 +1237,7 @@ begin
   CheckBroker;
   CheckConnection;
   S := Trim(SQL.Text);
-  GetParameterizeSQL(S, Params);
+  dParameterizeSQL(S, Params);
   Connection.Logger.Log(ltSQL, S);
   FBroker.Execute;
 end;

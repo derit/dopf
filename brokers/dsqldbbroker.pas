@@ -57,6 +57,11 @@ type
     function InTransaction: Boolean; override;
   end;
 
+  { TdSQLdbConnector }
+
+  TdSQLdbConnector = class(specialize TdConnection<TdSQLdbConnectionBroker, TdLogger>)
+  end;
+
   { TdSQLdbQueryBroker }
 
   TdSQLdbQueryBroker = class(TdQueryBroker)
@@ -113,6 +118,11 @@ type
     function Count: Int64; override;
     function GetBookmark: TBookmark; override;
     procedure GotoBookmark(ABookmark: TBookmark); override;
+  end;
+
+  { TdSQLdbQuery }
+
+  TdSQLdbQuery = class(specialize TdQuery<TdSQLdbQueryBroker, TdSQLdbConnector>)
   end;
 
 implementation

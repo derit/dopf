@@ -8,20 +8,15 @@ uses
 {$ENDIF}
   dOPF, dUtils, dSQLdbBroker, person, sysutils, pqconnection;
 
-type
-  Tcon = specialize TdConnection<TdSQLdbConnectionBroker, TdLogger>;
-
-  Tqry = specialize TdQuery<TdSQLdbQueryBroker, Tcon>;
-
 var
   i: Integer;
   b, e: TDateTime;
-  con: Tcon;
-  qry: Tqry;
+  con: TdSQLdbConnector;
+  qry: TdSQLdbQuery;
   per: TPerson;
 begin
-  con := Tcon.Create(nil);
-  qry := Tqry.Create(con);
+  con := TdSQLdbConnector.Create(nil);
+  qry := TdSQLdbQuery.Create(con);
   per := TPerson.Create;
   try
     con.Logger.Active := True;
@@ -40,18 +35,18 @@ begin
     qry.SQL.Text := 'insert into person (id, name) values (:id, :name)';
     per.Id := 1;
     per.Name := 'Silvio';
-    dUtils.SetParams(per, qry.Params);
+    dUtils.dSetParams(per, qry.Params);
     qry.Execute;
     per.Id := 2;
     per.Name := 'Waldir';
-    dUtils.SetParams(per, qry.Params);
+    dUtils.dSetParams(per, qry.Params);
     qry.Execute.Apply;
 
     qry.SQL.Text := 'select id, name from person';
     qry.Open.First;
     while not qry.EOF do
     begin
-      dUtils.GetFields(per, qry.Fields);
+      dUtils.dGetFields(per, qry.Fields);
       WriteLn('Record: ', per.id, ', ', per.Name);
       qry.Next;
     end;
@@ -63,7 +58,7 @@ begin
     begin
       per.Id := 0;
       per.Name := '';
-      dUtils.GetFields(per, qry.Fields);
+      dUtils.dGetFields(per, qry.Fields);
     end;
     e := Now;
     WriteLn('Performance: ', FormatDateTime('hh:nn:ss.zzz', e - b));
