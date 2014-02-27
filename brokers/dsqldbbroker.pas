@@ -22,11 +22,11 @@ uses
 
 type
 
-  { TdSQLdbConnectionDef }
+  { TdSQLdbConnectionBroker }
 
-  TdSQLdbConnectionDef = class(TdConnectionDef)
+  TdSQLdbConnectionBroker = class(TdConnectionBroker)
   private
-    FConn: TSQLConnector;
+    FCon: TSQLConnector;
   protected
     function GetConnection: TObject; override;
     function GetTransaction: TObject; override;
@@ -47,26 +47,26 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
-    function Connect: TdConnectionDef; override;
-    function Disconnect: TdConnectionDef; override;
-    function StartTransaction: TdConnectionDef; override;
-    function Commit: TdConnectionDef; override;
-    function CommitRetaining: TdConnectionDef; override;
-    function Rollback: TdConnectionDef; override;
-    function RollbackRetaining: TdConnectionDef; override;
+    function Connect: TdConnectionBroker; override;
+    function Disconnect: TdConnectionBroker; override;
+    function StartTransaction: TdConnectionBroker; override;
+    function Commit: TdConnectionBroker; override;
+    function CommitRetaining: TdConnectionBroker; override;
+    function Rollback: TdConnectionBroker; override;
+    function RollbackRetaining: TdConnectionBroker; override;
     function InTransaction: Boolean; override;
   end;
 
-  { TdSQLdbQueryDef }
+  { TdSQLdbQueryBroker }
 
-  TdSQLdbQueryDef = class(TdQueryDef)
+  TdSQLdbQueryBroker = class(TdQueryBroker)
   private
-    FConn: TdConnection;
+    FCon: TSQLConnector;
     FQuery: TSQLQuery;
   protected
     function GetActive: Boolean; override;
     function GetBOF: Boolean; override;
-    function GetConnection: TdConnection; override;
+    function GetConnection: TObject; override;
     function GetDataSet: TDataSet; override;
     function GetDataSource: TDataSource; override;
     function GetEOF: Boolean; override;
@@ -78,32 +78,32 @@ type
     function GetSQL: TStrings; override;
     function GetState: TDataSetState; override;
     procedure SetActive(const AValue: Boolean); override;
-    procedure SetConnection(AValue: TdConnection); override;
+    procedure SetConnection(AValue: TObject); override;
     procedure SetDataSource(AValue: TDataSource); override;
     procedure SetPosition(const AValue: Int64); override;
   public
     constructor Create; override;
     destructor Destroy; override;
-    function ApplyUpdates: TdQueryDef; override;
-    function CancelUpdates: TdQueryDef; override;
-    function Apply: TdQueryDef; override;
-    function ApplyRetaining: TdQueryDef; override;
-    function Undo: TdQueryDef; override;
-    function UndoRetaining: TdQueryDef; override;
-    function Append: TdQueryDef; override;
-    function Insert: TdQueryDef; override;
-    function Edit: TdQueryDef; override;
-    function Cancel: TdQueryDef; override;
-    function Delete: TdQueryDef; override;
-    function Open: TdQueryDef; override;
-    function Close: TdQueryDef; override;
-    function Refresh: TdQueryDef; override;
-    function First: TdQueryDef; override;
-    function Prior: TdQueryDef; override;
-    function Next: TdQueryDef; override;
-    function Last: TdQueryDef; override;
-    function Post: TdQueryDef; override;
-    function Execute: TdQueryDef; override;
+    function ApplyUpdates: TdQueryBroker; override;
+    function CancelUpdates: TdQueryBroker; override;
+    function Apply: TdQueryBroker; override;
+    function ApplyRetaining: TdQueryBroker; override;
+    function Undo: TdQueryBroker; override;
+    function UndoRetaining: TdQueryBroker; override;
+    function Append: TdQueryBroker; override;
+    function Insert: TdQueryBroker; override;
+    function Edit: TdQueryBroker; override;
+    function Cancel: TdQueryBroker; override;
+    function Delete: TdQueryBroker; override;
+    function Open: TdQueryBroker; override;
+    function Close: TdQueryBroker; override;
+    function Refresh: TdQueryBroker; override;
+    function First: TdQueryBroker; override;
+    function Prior: TdQueryBroker; override;
+    function Next: TdQueryBroker; override;
+    function Last: TdQueryBroker; override;
+    function Post: TdQueryBroker; override;
+    function Execute: TdQueryBroker; override;
     function RowsAffected: Int64; override;
     function Locate(const AKeyFields: string;const AKeyValues: Variant;
       const AOptions: TLocateOptions = []): Boolean; override;
@@ -115,474 +115,445 @@ type
     procedure GotoBookmark(ABookmark: TBookmark); override;
   end;
 
-  { TdSQLdbBroker }
-
-  TdSQLdbBroker = class(TdBroker)
-  public
-    class function GetConnectionDefClass: TdConnectionDefClass; override;
-    class function GetQueryDefClass: TdQueryDefClass; override;
-  end;
-
 implementation
 
-{ TdSQLdbConnectionDef }
+{ TdSQLdbConnectionBroker }
 
-constructor TdSQLdbConnectionDef.Create;
+constructor TdSQLdbConnectionBroker.Create;
 begin
   inherited Create;
-  FConn := TSQLConnector.Create(nil);
-  FConn.Transaction := TSQLTransaction.Create(FConn);
+  FCon := TSQLConnector.Create(nil);
+  FCon.Transaction := TSQLTransaction.Create(FCon);
 end;
 
-destructor TdSQLdbConnectionDef.Destroy;
+destructor TdSQLdbConnectionBroker.Destroy;
 begin
-  FreeAndNil(FConn);
+  FreeAndNil(FCon);
   inherited Destroy;
 end;
 
-function TdSQLdbConnectionDef.Connect: TdConnectionDef;
+function TdSQLdbConnectionBroker.Connect: TdConnectionBroker;
 begin
   Result := Self;
-  FConn.Connected := True;
+  FCon.Connected := True;
 end;
 
-function TdSQLdbConnectionDef.Disconnect: TdConnectionDef;
+function TdSQLdbConnectionBroker.Disconnect: TdConnectionBroker;
 begin
   Result := Self;
-  FConn.Connected := False;
+  FCon.Connected := False;
 end;
 
-function TdSQLdbConnectionDef.StartTransaction: TdConnectionDef;
+function TdSQLdbConnectionBroker.StartTransaction: TdConnectionBroker;
 begin
   Result := Self;
-  FConn.Transaction.StartTransaction;
+  FCon.Transaction.StartTransaction;
 end;
 
-function TdSQLdbConnectionDef.Commit: TdConnectionDef;
+function TdSQLdbConnectionBroker.Commit: TdConnectionBroker;
 begin
   Result := Self;
-  FConn.Transaction.Commit;
+  FCon.Transaction.Commit;
 end;
 
-function TdSQLdbConnectionDef.CommitRetaining: TdConnectionDef;
+function TdSQLdbConnectionBroker.CommitRetaining: TdConnectionBroker;
 begin
   Result := Self;
-  FConn.Transaction.CommitRetaining;
+  FCon.Transaction.CommitRetaining;
 end;
 
-function TdSQLdbConnectionDef.Rollback: TdConnectionDef;
+function TdSQLdbConnectionBroker.Rollback: TdConnectionBroker;
+begin
+  Result := nil;
+  FCon.Transaction.Rollback;
+end;
+
+function TdSQLdbConnectionBroker.RollbackRetaining: TdConnectionBroker;
 begin
   Result := Self;
-  FConn.Transaction.Rollback;
+  FCon.Transaction.RollbackRetaining;
 end;
 
-function TdSQLdbConnectionDef.RollbackRetaining: TdConnectionDef;
+function TdSQLdbConnectionBroker.InTransaction: Boolean;
 begin
-  Result := Self;
-  FConn.Transaction.RollbackRetaining;
+  Result := FCon.Transaction.Active;
 end;
 
-function TdSQLdbConnectionDef.InTransaction: Boolean;
+function TdSQLdbConnectionBroker.GetConnection: TObject;
 begin
-  Result := FConn.Transaction.Active;
+  Result := FCon;
 end;
 
-function TdSQLdbConnectionDef.GetConnection: TObject;
+function TdSQLdbConnectionBroker.GetTransaction: TObject;
 begin
-  Result := FConn;
+  Result := FCon.Transaction;
 end;
 
-function TdSQLdbConnectionDef.GetTransaction: TObject;
+function TdSQLdbConnectionBroker.GetConnected: Boolean;
 begin
-  Result := FConn.Transaction;
+  Result := FCon.Connected;
 end;
 
-function TdSQLdbConnectionDef.GetConnected: Boolean;
+function TdSQLdbConnectionBroker.GetDatabase: string;
 begin
-  Result := FConn.Connected;
+  Result := FCon.DatabaseName;
 end;
 
-function TdSQLdbConnectionDef.GetDatabase: string;
+function TdSQLdbConnectionBroker.GetDriver: string;
 begin
-  Result := FConn.DatabaseName;
+  Result := FCon.ConnectorType;
 end;
 
-function TdSQLdbConnectionDef.GetDriver: string;
+function TdSQLdbConnectionBroker.GetHost: string;
 begin
-  Result := FConn.ConnectorType;
+  Result := FCon.HostName;
 end;
 
-function TdSQLdbConnectionDef.GetHost: string;
+function TdSQLdbConnectionBroker.GetPassword: string;
 begin
-  Result := FConn.HostName;
+  Result := FCon.Password;
 end;
 
-function TdSQLdbConnectionDef.GetPassword: string;
+function TdSQLdbConnectionBroker.GetPort: Integer;
 begin
-  Result := FConn.Password;
+  Result := StrToIntDef(FCon.Params.Values['port'], 0);
 end;
 
-function TdSQLdbConnectionDef.GetPort: Integer;
+function TdSQLdbConnectionBroker.GetUser: string;
 begin
-  Result := StrToIntDef(FConn.Params.Values['port'], 0);
+  Result := FCon.UserName;
 end;
 
-function TdSQLdbConnectionDef.GetUser: string;
+procedure TdSQLdbConnectionBroker.SetConnected(const AValue: Boolean);
 begin
-  Result := FConn.UserName;
+  FCon.Connected := AValue;
 end;
 
-procedure TdSQLdbConnectionDef.SetConnected(const AValue: Boolean);
+procedure TdSQLdbConnectionBroker.SetDatabase(const AValue: string);
 begin
-  FConn.Connected := AValue;
+  FCon.DatabaseName := AValue;
 end;
 
-procedure TdSQLdbConnectionDef.SetDatabase(const AValue: string);
+procedure TdSQLdbConnectionBroker.SetDriver(const AValue: string);
 begin
-  FConn.DatabaseName := AValue;
+  FCon.ConnectorType := AValue;
 end;
 
-procedure TdSQLdbConnectionDef.SetDriver(const AValue: string);
+procedure TdSQLdbConnectionBroker.SetHost(const AValue: string);
 begin
-  FConn.ConnectorType := AValue;
+  FCon.HostName := AValue;
 end;
 
-procedure TdSQLdbConnectionDef.SetHost(const AValue: string);
+procedure TdSQLdbConnectionBroker.SetPassword(const AValue: string);
 begin
-  FConn.HostName := AValue;
+  FCon.Password := AValue;
 end;
 
-procedure TdSQLdbConnectionDef.SetPassword(const AValue: string);
+procedure TdSQLdbConnectionBroker.SetPort(const AValue: Integer);
 begin
-  FConn.Password := AValue;
+  FCon.Params.Values['port'] := IntToStr(AValue);
 end;
 
-procedure TdSQLdbConnectionDef.SetPort(const AValue: Integer);
+procedure TdSQLdbConnectionBroker.SetUser(const AValue: string);
 begin
-  FConn.Params.Values['port'] := IntToStr(AValue);
+  FCon.UserName := AValue;
 end;
 
-procedure TdSQLdbConnectionDef.SetUser(const AValue: string);
-begin
-  FConn.UserName := AValue;
-end;
+{ TdSQLdbQueryBroker }
 
-{ TdSQLdbQueryDef }
-
-constructor TdSQLdbQueryDef.Create;
+constructor TdSQLdbQueryBroker.Create;
 begin
   inherited Create;
   FQuery := TSQLQuery.Create(nil);
 end;
 
-destructor TdSQLdbQueryDef.Destroy;
+destructor TdSQLdbQueryBroker.Destroy;
 begin
   FreeAndNil(FQuery);
   inherited Destroy;
 end;
 
-function TdSQLdbQueryDef.GetActive: Boolean;
+function TdSQLdbQueryBroker.GetActive: Boolean;
 begin
   Result := FQuery.Active;
 end;
 
-function TdSQLdbQueryDef.GetBOF: Boolean;
+function TdSQLdbQueryBroker.GetBOF: Boolean;
 begin
   Result := FQuery.BOF;
 end;
 
-function TdSQLdbQueryDef.GetConnection: TdConnection;
+function TdSQLdbQueryBroker.GetConnection: TObject;
 begin
-  Result := FConn;
+  Result := FCon;
 end;
 
-function TdSQLdbQueryDef.GetDataSet: TDataSet;
+function TdSQLdbQueryBroker.GetDataSet: TDataSet;
 begin
   Result := FQuery;
 end;
 
-function TdSQLdbQueryDef.GetDataSource: TDataSource;
+function TdSQLdbQueryBroker.GetDataSource: TDataSource;
 begin
   Result := FQuery.DataSource;
 end;
 
-function TdSQLdbQueryDef.GetEOF: Boolean;
+function TdSQLdbQueryBroker.GetEOF: Boolean;
 begin
   Result := FQuery.EOF;
 end;
 
-function TdSQLdbQueryDef.GetFieldDefs: TFieldDefs;
+function TdSQLdbQueryBroker.GetFieldDefs: TFieldDefs;
 begin
   Result := FQuery.FieldDefs;
 end;
 
-function TdSQLdbQueryDef.GetFields: TFields;
+function TdSQLdbQueryBroker.GetFields: TFields;
 begin
   Result := FQuery.Fields;
 end;
 
-function TdSQLdbQueryDef.GetModified: Boolean;
+function TdSQLdbQueryBroker.GetModified: Boolean;
 begin
   Result := FQuery.Modified;
 end;
 
-function TdSQLdbQueryDef.GetParams: TParams;
+function TdSQLdbQueryBroker.GetParams: TParams;
 begin
   Result := FQuery.Params;
 end;
 
-function TdSQLdbQueryDef.GetPosition: Int64;
+function TdSQLdbQueryBroker.GetPosition: Int64;
 begin
   Result := FQuery.RecNo;
 end;
 
-function TdSQLdbQueryDef.GetSQL: TStrings;
+function TdSQLdbQueryBroker.GetSQL: TStrings;
 begin
   Result := FQuery.SQL;
 end;
 
-function TdSQLdbQueryDef.GetState: TDataSetState;
+function TdSQLdbQueryBroker.GetState: TDataSetState;
 begin
   Result := FQuery.State;
 end;
 
-procedure TdSQLdbQueryDef.SetActive(const AValue: Boolean);
+procedure TdSQLdbQueryBroker.SetActive(const AValue: Boolean);
 begin
   FQuery.Active := AValue;
 end;
 
-procedure TdSQLdbQueryDef.SetConnection(AValue: TdConnection);
+procedure TdSQLdbQueryBroker.SetConnection(AValue: TObject);
 begin
-  FConn := AValue;
-  if Assigned(FConn) and Assigned(FConn.Def) and
-    Assigned(FConn.Def.Connection) then
+  if Assigned(AValue) and (AValue is TSQLConnector) then
   begin
-    FQuery.DataBase := TSQLConnector(FConn.Def.Connection);
-    FQuery.Transaction := TSQLTransaction(FConn.Def.Transaction);
+    FCon := AValue as TSQLConnector;
+    FQuery.DataBase := FCon;
+    FQuery.Transaction := FCon.Transaction;
   end
   else
+  begin
+    FCon := nil;
+    FQuery.Transaction := nil;
     FQuery.DataBase := nil;
+  end;
 end;
 
-procedure TdSQLdbQueryDef.SetDataSource(AValue: TDataSource);
+procedure TdSQLdbQueryBroker.SetDataSource(AValue: TDataSource);
 begin
   FQuery.DataSource := AValue;
 end;
 
-procedure TdSQLdbQueryDef.SetPosition(const AValue: Int64);
+procedure TdSQLdbQueryBroker.SetPosition(const AValue: Int64);
 begin
   FQuery.RecNo := AValue;
 end;
 
-function TdSQLdbQueryDef.ApplyUpdates: TdQueryDef;
+function TdSQLdbQueryBroker.ApplyUpdates: TdQueryBroker;
 begin
   Result := Self;
   FQuery.ApplyUpdates(0);
 end;
 
-function TdSQLdbQueryDef.CancelUpdates: TdQueryDef;
+function TdSQLdbQueryBroker.CancelUpdates: TdQueryBroker;
 begin
   Result := Self;
   FQuery.CancelUpdates;
 end;
 
-function TdSQLdbQueryDef.Apply: TdQueryDef;
-var
-  VTrans: TSQLTransaction;
+function TdSQLdbQueryBroker.Apply: TdQueryBroker;
 begin
   Result := Self;
-  VTrans := TSQLConnector(FQuery.DataBase).Transaction;
-  if not VTrans.Active then
-    Exit;
+  if Assigned(FCon) and FCon.Transaction.Active then
+    try
+      if FQuery.Modified then
+        FQuery.ApplyUpdates(0);
+      FCon.Transaction.Commit;
+    except
+      FCon.Transaction.Rollback;
+      raise;
+    end;
+end;
+
+function TdSQLdbQueryBroker.ApplyRetaining: TdQueryBroker;
+begin
+  Result := Self;
+  if Assigned(FCon) and FCon.Transaction.Active then
   try
     if FQuery.Modified then
       FQuery.ApplyUpdates(0);
-    VTrans.Commit;
+    FCon.Transaction.CommitRetaining;
   except
-    VTrans.Rollback;
+    FCon.Transaction.RollbackRetaining;
     raise;
   end;
 end;
 
-function TdSQLdbQueryDef.ApplyRetaining: TdQueryDef;
-var
-  VTrans: TSQLTransaction;
+function TdSQLdbQueryBroker.Undo: TdQueryBroker;
 begin
   Result := Self;
-  VTrans := TSQLConnector(FQuery.DataBase).Transaction;
-  if not VTrans.Active then
-    Exit;
-  try
+  if Assigned(FCon) and FCon.Transaction.Active then
+  begin
     if FQuery.Modified then
-      FQuery.ApplyUpdates(0);
-    VTrans.CommitRetaining;
-  except
-    VTrans.RollbackRetaining;
-    raise;
+      FQuery.CancelUpdates;
+    FCon.Transaction.Rollback;
   end;
 end;
 
-function TdSQLdbQueryDef.Undo: TdQueryDef;
-var
-  VTrans: TSQLTransaction;
+function TdSQLdbQueryBroker.UndoRetaining: TdQueryBroker;
 begin
   Result := Self;
-  VTrans := TSQLConnector(FQuery.DataBase).Transaction;
-  if not VTrans.Active then
-    Exit;
-  if FQuery.Modified then
-    FQuery.CancelUpdates;
-  VTrans.Rollback;
+  if Assigned(FCon) and FCon.Transaction.Active then
+  begin
+    if FQuery.Modified then
+      FQuery.CancelUpdates;
+    FCon.Transaction.RollbackRetaining;
+  end;
 end;
 
-function TdSQLdbQueryDef.UndoRetaining: TdQueryDef;
-var
-  VTrans: TSQLTransaction;
-begin
-  Result := Self;
-  VTrans := TSQLConnector(FQuery.DataBase).Transaction;
-  if not VTrans.Active then
-    Exit;
-  if FQuery.Modified then
-    FQuery.CancelUpdates;
-  VTrans.RollbackRetaining;
-end;
-
-function TdSQLdbQueryDef.Append: TdQueryDef;
+function TdSQLdbQueryBroker.Append: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Append;
 end;
 
-function TdSQLdbQueryDef.Insert: TdQueryDef;
+function TdSQLdbQueryBroker.Insert: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Insert;
 end;
 
-function TdSQLdbQueryDef.Edit: TdQueryDef;
+function TdSQLdbQueryBroker.Edit: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Edit;
 end;
 
-function TdSQLdbQueryDef.Cancel: TdQueryDef;
+function TdSQLdbQueryBroker.Cancel: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Cancel;
 end;
 
-function TdSQLdbQueryDef.Delete: TdQueryDef;
+function TdSQLdbQueryBroker.Delete: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Delete;
 end;
 
-function TdSQLdbQueryDef.Open: TdQueryDef;
+function TdSQLdbQueryBroker.Open: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Open;
 end;
 
-function TdSQLdbQueryDef.Close: TdQueryDef;
+function TdSQLdbQueryBroker.Close: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Close;
 end;
 
-function TdSQLdbQueryDef.Refresh: TdQueryDef;
+function TdSQLdbQueryBroker.Refresh: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Refresh;
 end;
 
-function TdSQLdbQueryDef.First: TdQueryDef;
+function TdSQLdbQueryBroker.First: TdQueryBroker;
 begin
   Result := Self;
   FQuery.First;
 end;
 
-function TdSQLdbQueryDef.Prior: TdQueryDef;
+function TdSQLdbQueryBroker.Prior: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Prior;
 end;
 
-function TdSQLdbQueryDef.Next: TdQueryDef;
+function TdSQLdbQueryBroker.Next: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Next;
 end;
 
-function TdSQLdbQueryDef.Last: TdQueryDef;
+function TdSQLdbQueryBroker.Last: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Last;
 end;
 
-function TdSQLdbQueryDef.Post: TdQueryDef;
+function TdSQLdbQueryBroker.Post: TdQueryBroker;
 begin
   Result := Self;
   FQuery.Post;
 end;
 
-function TdSQLdbQueryDef.Execute: TdQueryDef;
+function TdSQLdbQueryBroker.Execute: TdQueryBroker;
 begin
   Result := Self;
   FQuery.ExecSQL;
 end;
 
-function TdSQLdbQueryDef.RowsAffected: Int64;
+function TdSQLdbQueryBroker.RowsAffected: Int64;
 begin
   Result := FQuery.RowsAffected;
 end;
 
-function TdSQLdbQueryDef.Locate(const AKeyFields: string;
+function TdSQLdbQueryBroker.Locate(const AKeyFields: string;
   const AKeyValues: Variant; const AOptions: TLocateOptions): Boolean;
 begin
   Result := FQuery.Locate(AKeyFields, AKeyValues, AOptions);
 end;
 
-function TdSQLdbQueryDef.Param(const AName: string): TParam;
+function TdSQLdbQueryBroker.Param(const AName: string): TParam;
 begin
   Result := FQuery.Params.ParamByName(AName);
 end;
 
-function TdSQLdbQueryDef.Field(const AName: string): TField;
+function TdSQLdbQueryBroker.Field(const AName: string): TField;
 begin
   Result := FQuery.Fields.FieldByName(AName);
 end;
 
-function TdSQLdbQueryDef.FieldDef(const AName: string): TFieldDef;
+function TdSQLdbQueryBroker.FieldDef(const AName: string): TFieldDef;
 begin
   Result := FQuery.FieldDefs.Find(AName);
 end;
 
-function TdSQLdbQueryDef.Count: Int64;
+function TdSQLdbQueryBroker.Count: Int64;
 begin
   Result := FQuery.RecordCount;
 end;
 
-function TdSQLdbQueryDef.GetBookmark: TBookmark;
+function TdSQLdbQueryBroker.GetBookmark: TBookmark;
 begin
   Result := FQuery.GetBookmark;
 end;
 
-procedure TdSQLdbQueryDef.GotoBookmark(ABookmark: TBookmark);
+procedure TdSQLdbQueryBroker.GotoBookmark(ABookmark: TBookmark);
 begin
   FQuery.GotoBookmark(ABookmark);
-end;
-
-{ TdSQLdbBroker }
-
-class function TdSQLdbBroker.GetConnectionDefClass: TdConnectionDefClass;
-begin
-  Result := TdSQLdbConnectionDef;
-end;
-
-class function TdSQLdbBroker.GetQueryDefClass: TdQueryDefClass;
-begin
-  Result := TdSQLdbQueryDef;
 end;
 
 end.

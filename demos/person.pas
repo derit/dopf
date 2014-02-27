@@ -8,7 +8,7 @@ type
 
   { TPerson }
 
-  TPerson = class
+  TPerson = class(TObject)
   private
     FId: Int64;
     FName: string;

@@ -3,18 +3,27 @@ program demo1;
 {$mode objfpc}{$H+}
 
 uses
-  dOPF, dSQLdbBroker, person, sysutils, pqconnection;
+{$IFDEF DEBUG}
+  heaptrc,
+{$ENDIF}
+  dOPF, dUtils, dSQLdbBroker, person, sysutils, pqconnection;
+
+type
+  Tcon = specialize TdConnection<TdSQLdbConnectionBroker, TdLogger>;
+
+  Tqry = specialize TdQuery<TdSQLdbQueryBroker, Tcon>;
 
 var
   i: Integer;
   b, e: TDateTime;
-  con: TdConnection;
-  qry: TdQuery;
+  con: Tcon;
+  qry: Tqry;
   per: TPerson;
 begin
+  con := Tcon.Create(nil);
+  qry := Tqry.Create(con);
   per := TPerson.Create;
   try
-    con := TdConnection.Create(nil, TdSQLdbBroker);
     con.Logger.Active := True;
     con.Logger.Filter := [ltSQL];
     con.Logger.FileName := 'OUTPUT.LOG';
@@ -24,7 +33,6 @@ begin
     con.User := 'postgres';
     con.Password := 'postgres';
     con.Connect;
-    qry := TdQuery.Create(con);
 
     qry.SQL.Text := 'delete from person';
     qry.Execute.Apply;
@@ -32,14 +40,22 @@ begin
     qry.SQL.Text := 'insert into person (id, name) values (:id, :name)';
     per.Id := 1;
     per.Name := 'Silvio';
-    qry.SetParams(per).Execute;
+    dUtils.SetParams(per, qry.Params);
+    qry.Execute;
     per.Id := 2;
     per.Name := 'Waldir';
-    qry.SetParams(per).Execute.Apply;
+    dUtils.SetParams(per, qry.Params);
+    qry.Execute.Apply;
 
     qry.SQL.Text := 'select id, name from person';
-    qry.Open.GetFields(per).Apply;
-    WriteLn('Record: ', per.id, ', ', per.Name);
+    qry.Open.First;
+    while not qry.EOF do
+    begin
+      dUtils.GetFields(per, qry.Fields);
+      WriteLn('Record: ', per.id, ', ', per.Name);
+      qry.Next;
+    end;
+    qry.Open.Apply;
 
     qry.Open.First;
     b := Now;
@@ -47,7 +63,7 @@ begin
     begin
       per.Id := 0;
       per.Name := '';
-      qry.GetFields(per);
+      dUtils.GetFields(per, qry.Fields);
     end;
     e := Now;
     WriteLn('Performance: ', FormatDateTime('hh:nn:ss.zzz', e - b));
@@ -57,5 +73,10 @@ begin
     per.Free;
     con.Free;
   end;
+{$IFDEF DEBUG}
+  DeleteFile('HEAP.TXT');
+  SetHeapTraceOutput('HEAP.TXT');
+  Sleep(1000);
+{$ENDIF}
 end.
 

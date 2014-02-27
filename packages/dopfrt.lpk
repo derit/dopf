@@ -21,20 +21,24 @@
     </CompilerOptions>
     <Description Value="Duall Sistemas, Object Persistence Framework."/>
     <License Value="See the file LICENSE, included in this distribution, for details about the copyright."/>
-    <Version Major="1"/>
-    <Files Count="3">
+    <Version Major="2"/>
+    <Files Count="4">
       <Item1>
         <Filename Value="..\brokers\dsqldbbroker.pas"/>
-        <UnitName Value="dsqldbbroker"/>
+        <UnitName Value="dSQLdbBroker"/>
       </Item1>
       <Item2>
         <Filename Value="..\core\dopf.pas"/>
-        <UnitName Value="dopf"/>
+        <UnitName Value="dOPF"/>
       </Item2>
       <Item3>
         <Filename Value="..\core\dopf.inc"/>
         <Type Value="Binary"/>
       </Item3>
+      <Item4>
+        <Filename Value="..\core\dutils.pas"/>
+        <UnitName Value="dUtils"/>
+      </Item4>
     </Files>
     <Type Value="RunTimeOnly"/>
     <RequiredPkgs Count="1">

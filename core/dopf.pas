@@ -18,7 +18,7 @@ unit dOPF;
 interface
 
 uses
-  Classes, SysUtils, DB, TypInfo;
+  dUtils, Classes, SysUtils, DB;
 
 type
   EdNotImplemented = class(Exception);
@@ -32,8 +32,6 @@ type
   TdLogFilter = set of TdLogType;
 
   TdLogEvent = procedure(const AType: TdLogType; const AMsg: string) of object;
-
-  TdBrokerClass = class of TdBroker;
 
   { TdLogger }
 
@@ -58,9 +56,9 @@ type
     property OnLog: TdLogEvent read FOnLog write FOnLog;
   end;
 
-  { TdConnectionDef }
+  { TdConnectionBroker }
 
-  TdConnectionDef = class(TObject)
+  TdConnectionBroker = class(TObject)
   protected
     function GetConnection: TObject; virtual;
     function GetTransaction: TObject; virtual;
@@ -80,13 +78,13 @@ type
     procedure SetUser({%H-}const AValue: string); virtual;
   public
     constructor Create; virtual;
-    function Connect: TdConnectionDef; virtual;
-    function Disconnect: TdConnectionDef; virtual;
-    function StartTransaction: TdConnectionDef; virtual;
-    function Commit: TdConnectionDef; virtual;
-    function CommitRetaining: TdConnectionDef; virtual;
-    function Rollback: TdConnectionDef; virtual;
-    function RollbackRetaining: TdConnectionDef; virtual;
+    function Connect: TdConnectionBroker; virtual;
+    function Disconnect: TdConnectionBroker; virtual;
+    function StartTransaction: TdConnectionBroker; virtual;
+    function Commit: TdConnectionBroker; virtual;
+    function CommitRetaining: TdConnectionBroker; virtual;
+    function Rollback: TdConnectionBroker; virtual;
+    function RollbackRetaining: TdConnectionBroker; virtual;
     function InTransaction: Boolean; virtual;
     property Connection: TObject read GetConnection;
     property Transaction: TObject read GetTransaction;
@@ -100,15 +98,12 @@ type
     property Port: Integer read GetPort write SetPort;
   end;
 
-  TdConnectionDefClass = class of TdConnectionDef;
-
   { TdConnection }
 
-  TdConnection = class(TComponent)
+  generic TdConnection<T1, T2> = class(TComponent)
   private
-    FBrokerClass: TdBrokerClass;
-    FDef: TdConnectionDef;
-    FLogger: TdLogger;
+    FBroker: T1;
+    FLogger: T2;
     function GetConnected: Boolean;
     function GetDatabase: string;
     function GetDriver: string;
@@ -116,33 +111,31 @@ type
     function GetPassword: string;
     function GetPort: Integer;
     function GetUser: string;
-    procedure SetConnected(AValue: Boolean);
-    procedure SetDatabase(AValue: string);
-    procedure SetDriver(AValue: string);
-    procedure SetHost(AValue: string);
-    procedure SetPassword(AValue: string);
-    procedure SetPort(AValue: Integer);
-    procedure SetUser(AValue: string);
+    procedure SetConnected(const AValue: Boolean);
+    procedure SetDatabase(const AValue: string);
+    procedure SetDriver(const AValue: string);
+    procedure SetHost(const AValue: string);
+    procedure SetPassword(const AValue: string);
+    procedure SetPort(const AValue: Integer);
+    procedure SetUser(const AValue: string);
   protected
-    procedure CheckDef;
+    procedure CheckBrokerClass; virtual;
+    procedure CheckBroker; virtual;
+    procedure CheckLoggerClass; virtual;
   public
     constructor Create(AOwner: TComponent); override;
-    constructor Create(AOwner: TComponent;
-      ABrokerClass: TdBrokerClass); overload; virtual;
     destructor Destroy; override;
-    function GetBrokerClass: TdBrokerClass;
-    procedure SetDef(ABrokerClass: TdBrokerClass);
-    function Connect: TdConnection;
-    function Disconnect: TdConnection;
-    function StartTransaction: TdConnection;
-    function Commit: TdConnection;
-    function CommitRetaining: TdConnection;
-    function Rollback: TdConnection;
-    function RollbackRetaining: TdConnection;
+    function Connect: T1;
+    function Disconnect: T1;
+    function StartTransaction: T1;
+    function Commit: T1;
+    function CommitRetaining: T1;
+    function Rollback: T1;
+    function RollbackRetaining: T1;
     function InTransaction: Boolean;
+    property Broker: T1 read FBroker write FBroker;
+    property Logger: T2 read FLogger write FLogger;
     property Connected: Boolean read GetConnected write SetConnected;
-    property Def: TdConnectionDef read FDef write FDef;
-    property Logger: TdLogger read FLogger;
   published
     property Driver: string read GetDriver write SetDriver;
     property Database: string read GetDatabase write SetDatabase;
@@ -152,13 +145,13 @@ type
     property Port: Integer read GetPort write SetPort;
   end;
 
-  { TdQueryDef }
+  { TdQueryBroker }
 
-  TdQueryDef = class(TObject)
+  TdQueryBroker = class(TObject)
   protected
     function GetActive: Boolean; virtual;
     function GetBOF: Boolean; virtual;
-    function GetConnection: TdConnection; virtual;
+    function GetConnection: TObject; virtual;
     function GetDataSet: TDataSet; virtual;
     function GetDataSource: TDataSource; virtual;
     function GetEOF: Boolean; virtual;
@@ -170,31 +163,31 @@ type
     function GetSQL: TStrings; virtual;
     function GetState: TDataSetState; virtual;
     procedure SetActive({%H-}const AValue: Boolean); virtual;
-    procedure SetConnection({%H-}AValue: TdConnection); virtual;
+    procedure SetConnection({%H-}AValue: TObject); virtual;
     procedure SetDataSource({%H-}AValue: TDataSource); virtual;
     procedure SetPosition({%H-}const AValue: Int64); virtual;
   public
     constructor Create; virtual;
-    function ApplyUpdates: TdQueryDef; virtual;
-    function CancelUpdates: TdQueryDef; virtual;
-    function Apply: TdQueryDef; virtual;
-    function ApplyRetaining: TdQueryDef; virtual;
-    function Undo: TdQueryDef; virtual;
-    function UndoRetaining: TdQueryDef; virtual;
-    function Append: TdQueryDef; virtual;
-    function Insert: TdQueryDef; virtual;
-    function Edit: TdQueryDef; virtual;
-    function Cancel: TdQueryDef; virtual;
-    function Delete: TdQueryDef; virtual;
-    function Open: TdQueryDef; virtual;
-    function Close: TdQueryDef; virtual;
-    function Refresh: TdQueryDef; virtual;
-    function First: TdQueryDef; virtual;
-    function Prior: TdQueryDef; virtual;
-    function Next: TdQueryDef; virtual;
-    function Last: TdQueryDef; virtual;
-    function Post: TdQueryDef; virtual;
-    function Execute: TdQueryDef; virtual;
+    function ApplyUpdates: TdQueryBroker; virtual;
+    function CancelUpdates: TdQueryBroker; virtual;
+    function Apply: TdQueryBroker; virtual;
+    function ApplyRetaining: TdQueryBroker; virtual;
+    function Undo: TdQueryBroker; virtual;
+    function UndoRetaining: TdQueryBroker; virtual;
+    function Append: TdQueryBroker; virtual;
+    function Insert: TdQueryBroker; virtual;
+    function Edit: TdQueryBroker; virtual;
+    function Cancel: TdQueryBroker; virtual;
+    function Delete: TdQueryBroker; virtual;
+    function Open: TdQueryBroker; virtual;
+    function Close: TdQueryBroker; virtual;
+    function Refresh: TdQueryBroker; virtual;
+    function First: TdQueryBroker; virtual;
+    function Prior: TdQueryBroker; virtual;
+    function Next: TdQueryBroker; virtual;
+    function Last: TdQueryBroker; virtual;
+    function Post: TdQueryBroker; virtual;
+    function Execute: TdQueryBroker; virtual;
     function RowsAffected: Int64; virtual;
     function Locate({%H-}const AKeyFields: string;{%H-}const AKeyValues: Variant;
       {%H-}const AOptions: TLocateOptions = []): Boolean; virtual;
@@ -218,20 +211,17 @@ type
     property DataSet: TDataSet read GetDataSet;
     property FieldDefs: TFieldDefs read GetFieldDefs;
     property DataSource: TDataSource read GetDataSource write SetDataSource;
-    property Connection: TdConnection read GetConnection write SetConnection;
+    property Connection: TObject read GetConnection write SetConnection;
   end;
-
-  TdQueryDefClass = class of TdQueryDef;
 
   { TdQuery }
 
-  TdQuery = class(TComponent)
+  generic TdQuery<T1, T2> = class(TComponent)
   private
-    FBrokerClass: TdBrokerClass;
-    FDef: TdQueryDef;
+    FBroker: T1;
+    FConnection: T2;
     function GetActive: Boolean;
     function GetBOF: Boolean;
-    function GetConnection: TdConnection;
     function GetDataSet: TDataSet;
     function GetDataSource: TDataSource;
     function GetEOF: Boolean;
@@ -243,52 +233,49 @@ type
     function GetSQL: TStrings;
     function GetState: TDataSetState;
     procedure SetActive(const AValue: Boolean);
-    procedure SetConnection(AValue: TdConnection);
     procedure SetDataSource(AValue: TDataSource);
     procedure SetPosition(const AValue: Int64);
   protected
-    procedure CheckDef;
-    function GetParameterizedSQL: string; virtual;
+    procedure CheckConnection; virtual;
+    procedure CheckBrokerClass; virtual;
+    procedure CheckBroker; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure SetDef(ABrokerClass: TdBrokerClass);
-    function GetFields(AObject: TObject): TdQuery;
-    function GetParams(AObject: TObject): TdQuery;
-    function SetFields(AObject: TObject): TdQuery;
-    function SetParams(AObject: TObject): TdQuery;
-    function ApplyUpdates: TdQuery;
-    function CancelUpdates: TdQuery;
-    function Apply: TdQuery;
-    function ApplyRetaining: TdQuery;
-    function Undo: TdQuery;
-    function UndoRetaining: TdQuery;
-    function Append: TdQuery;
-    function Insert: TdQuery;
-    function Edit: TdQuery;
-    function Cancel: TdQuery;
-    function Delete: TdQuery;
-    function Open: TdQuery;
-    function Close: TdQuery;
-    function Refresh: TdQuery;
-    function First: TdQuery;
-    function Prior: TdQuery;
-    function Next: TdQuery;
-    function Last: TdQuery;
-    function Post: TdQuery;
-    function Execute: TdQuery;
+    function ApplyUpdates: T1;
+    function CancelUpdates: T1;
+    function Apply: T1;
+    function ApplyRetaining: T1;
+    function Undo: T1;
+    function UndoRetaining: T1;
+    function Append: T1;
+    function Insert: T1;
+    function Edit: T1;
+    function Cancel: T1;
+    function Delete: T1;
+    function Open: T1;
+    function Close: T1;
+    function Refresh: T1;
+    function First: T1;
+    function Prior: T1;
+    function Next: T1;
+    function Last: T1;
+    function Post: T1;
+    function Execute: T1;
     function RowsAffected: Int64;
-    function Locate(const AKeyFields: string; const AKeyValues: Variant;
-      const AOptions: TLocateOptions = []): Boolean;
-    function Param(const AName: string): TParam;
-    function Field(const AName: string): TField;
-    function FieldDef(const AName: string): TFieldDef;
+    function Locate({%H-}const AKeyFields: string;{%H-}const AKeyValues: Variant;
+      {%H-}const AOptions: TLocateOptions = []): Boolean;
+    function Param({%H-}const AName: string): TParam;
+    function Field({%H-}const AName: string): TField;
+    function FieldDef({%H-}const AName: string): TFieldDef;
     function Count: Int64;
     function GetBookmark: TBookmark;
-    procedure GotoBookmark(ABookmark: TBookmark);
-    property Def: TdQueryDef read FDef write FDef;
+    procedure GotoBookmark({%H-}ABookmark: TBookmark);
+    property Connection: T2 read FConnection write FConnection;
+    property Broker: T1 read FBroker write FBroker;
     property SQL: TStrings read GetSQL;
     property Fields: TFields read GetFields;
+    property FieldDefs: TFieldDefs read GetFieldDefs;
     property Params: TParams read GetParams;
     property BOF: Boolean read GetBOF;
     property EOF: Boolean read GetEOF;
@@ -297,18 +284,8 @@ type
     property State: TDataSetState read GetState;
     property Active: Boolean read GetActive write SetActive;
     property DataSet: TDataSet read GetDataSet;
-    property FieldDefs: TFieldDefs read GetFieldDefs;
     property DataSource: TDataSource read GetDataSource write SetDataSource;
-    property Connection: TdConnection read GetConnection write SetConnection;
     property Position: Int64 read GetPosition write SetPosition;
-  end;
-
-  { TdBroker }
-
-  TdBroker = class(TObject)
-  public
-    class function GetConnectionDefClass: TdConnectionDefClass; virtual;
-    class function GetQueryDefClass: TdQueryDefClass; virtual;
   end;
 
 implementation
@@ -383,146 +360,146 @@ begin
   end;
 end;
 
-{ TdConnectionDef }
+{ TdConnectionBroker }
 
-constructor TdConnectionDef.Create;
+constructor TdConnectionBroker.Create;
 begin
   inherited Create;
 end;
 
-function TdConnectionDef.Connect: TdConnectionDef;
+function TdConnectionBroker.Connect: TdConnectionBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.Disconnect: TdConnectionDef;
+function TdConnectionBroker.Disconnect: TdConnectionBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.StartTransaction: TdConnectionDef;
+function TdConnectionBroker.StartTransaction: TdConnectionBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.Commit: TdConnectionDef;
+function TdConnectionBroker.Commit: TdConnectionBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.CommitRetaining: TdConnectionDef;
+function TdConnectionBroker.CommitRetaining: TdConnectionBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.Rollback: TdConnectionDef;
+function TdConnectionBroker.Rollback: TdConnectionBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.RollbackRetaining: TdConnectionDef;
+function TdConnectionBroker.RollbackRetaining: TdConnectionBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.InTransaction: Boolean;
+function TdConnectionBroker.InTransaction: Boolean;
 begin
   Result := False;
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetConnection: TObject;
+function TdConnectionBroker.GetConnection: TObject;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetTransaction: TObject;
+function TdConnectionBroker.GetTransaction: TObject;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetConnected: Boolean;
+function TdConnectionBroker.GetConnected: Boolean;
 begin
   Result := False;
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetDatabase: string;
+function TdConnectionBroker.GetDatabase: string;
 begin
   Result := '';
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetDriver: string;
+function TdConnectionBroker.GetDriver: string;
 begin
   Result := '';
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetHost: string;
+function TdConnectionBroker.GetHost: string;
 begin
   Result := '';
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetPassword: string;
+function TdConnectionBroker.GetPassword: string;
 begin
   Result := '';
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetPort: Integer;
+function TdConnectionBroker.GetPort: Integer;
 begin
   Result := 0;
   NotImplementedError;
 end;
 
-function TdConnectionDef.GetUser: string;
+function TdConnectionBroker.GetUser: string;
 begin
   Result := '';
   NotImplementedError;
 end;
 
-procedure TdConnectionDef.SetConnected(const AValue: Boolean);
+procedure TdConnectionBroker.SetConnected(const AValue: Boolean);
 begin
   NotImplementedError;
 end;
 
-procedure TdConnectionDef.SetDatabase(const AValue: string);
+procedure TdConnectionBroker.SetDatabase(const AValue: string);
 begin
   NotImplementedError;
 end;
 
-procedure TdConnectionDef.SetDriver(const AValue: string);
+procedure TdConnectionBroker.SetDriver(const AValue: string);
 begin
   NotImplementedError;
 end;
 
-procedure TdConnectionDef.SetHost(const AValue: string);
+procedure TdConnectionBroker.SetHost(const AValue: string);
 begin
   NotImplementedError;
 end;
 
-procedure TdConnectionDef.SetPassword(const AValue: string);
+procedure TdConnectionBroker.SetPassword(const AValue: string);
 begin
   NotImplementedError;
 end;
 
-procedure TdConnectionDef.SetPort(const AValue: Integer);
+procedure TdConnectionBroker.SetPort(const AValue: Integer);
 begin
   NotImplementedError;
 end;
 
-procedure TdConnectionDef.SetUser(const AValue: string);
+procedure TdConnectionBroker.SetUser(const AValue: string);
 begin
   NotImplementedError;
 end;
@@ -532,455 +509,449 @@ end;
 constructor TdConnection.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FLogger := TdLogger.Create('');
-end;
-
-constructor TdConnection.Create(AOwner: TComponent;
-  ABrokerClass: TdBrokerClass);
-begin
-  Create(AOwner);
-  SetDef(ABrokerClass);
+  CheckBrokerClass;
+  CheckLoggerClass;
+  FBroker := T1.Create;
+  FLogger := T2.Create('');
 end;
 
 destructor TdConnection.Destroy;
 begin
-  FreeAndNil(FDef);
+  FBroker.Free;
   FLogger.Free;
   inherited Destroy;
 end;
 
-function TdConnection.GetBrokerClass: TdBrokerClass;
+procedure TdConnection.CheckBrokerClass;
 begin
-  Result := FBrokerClass;
+  if not T1.InheritsFrom(TdConnectionBroker) then
+    raise EdConnection.CreateFmt('Invalid broker class: "%s".', [T1.ClassName]);
 end;
 
-procedure TdConnection.SetDef(ABrokerClass: TdBrokerClass);
+procedure TdConnection.CheckBroker;
 begin
-  if not Assigned(ABrokerClass) then
-    raise EdConnection.Create('Broker class must not be nil.');
-  FreeAndNil(FDef);
-  FBrokerClass := ABrokerClass;
-  FDef := FBrokerClass.GetConnectionDefClass.Create;
+  if FBroker = nil then
+    raise EdConnection.Create('Broker not assigned.');
 end;
 
-procedure TdConnection.CheckDef;
+procedure TdConnection.CheckLoggerClass;
 begin
-  if not Assigned(FDef) then
-    raise EdConnection.Create('Definition is not set.');
+  if not T2.InheritsFrom(TdLogger) then
+    raise EdConnection.CreateFmt('Invalid logger class: "%s".', [T2.ClassName]);
 end;
 
 function TdConnection.GetConnected: Boolean;
 begin
-  CheckDef;
-  Result := FDef.GetConnected;
+  CheckBroker;
+  Result := FBroker.Connected;
 end;
 
 function TdConnection.GetDatabase: string;
 begin
-  CheckDef;
-  Result := FDef.GetDatabase;
+  CheckBroker;
+  Result := FBroker.Database;
 end;
 
 function TdConnection.GetDriver: string;
 begin
-  CheckDef;
-  Result := FDef.GetDriver;
+  CheckBroker;
+  Result := FBroker.Driver;
 end;
 
 function TdConnection.GetHost: string;
 begin
-  CheckDef;
-  Result := FDef.GetHost;
+  CheckBroker;
+  Result := FBroker.Host;
 end;
 
 function TdConnection.GetPassword: string;
 begin
-  CheckDef;
-  Result := FDef.GetPassword;
+  CheckBroker;
+  Result := FBroker.Password;
 end;
 
 function TdConnection.GetPort: Integer;
 begin
-  CheckDef;
-  Result := FDef.GetPort;
+  CheckBroker;
+  Result := FBroker.Port;
 end;
 
 function TdConnection.GetUser: string;
 begin
-  CheckDef;
-  Result := FDef.GetUser;
+  CheckBroker;
+  Result := FBroker.User;
 end;
 
-procedure TdConnection.SetConnected(AValue: Boolean);
+procedure TdConnection.SetConnected(const AValue: Boolean);
 begin
-  CheckDef;
-  FDef.SetConnected(AValue);
+  CheckBroker;
+  FBroker.Connected := AValue;
 end;
 
-procedure TdConnection.SetDatabase(AValue: string);
+procedure TdConnection.SetDatabase(const AValue: string);
 begin
-  CheckDef;
-  FDef.SetDatabase(AValue);
+  CheckBroker;
+  FBroker.Database := AValue;
 end;
 
-procedure TdConnection.SetDriver(AValue: string);
+procedure TdConnection.SetDriver(const AValue: string);
 begin
-  CheckDef;
-  FDef.SetDriver(AValue);
+  CheckBroker;
+  FBroker.Driver := AValue;
 end;
 
-procedure TdConnection.SetHost(AValue: string);
+procedure TdConnection.SetHost(const AValue: string);
 begin
-  CheckDef;
-  FDef.SetHost(AValue);
+  CheckBroker;
+  FBroker.Host := AValue;
 end;
 
-procedure TdConnection.SetPassword(AValue: string);
+procedure TdConnection.SetPassword(const AValue: string);
 begin
-  CheckDef;
-  FDef.SetPassword(AValue);
+  CheckBroker;
+  FBroker.Password := AValue;
 end;
 
-procedure TdConnection.SetPort(AValue: Integer);
+procedure TdConnection.SetPort(const AValue: Integer);
 begin
-  CheckDef;
-  FDef.SetPort(AValue);
+  CheckBroker;
+  FBroker.Port := AValue;
 end;
 
-procedure TdConnection.SetUser(AValue: string);
+procedure TdConnection.SetUser(const AValue: string);
 begin
-  CheckDef;
-  FDef.SetUser(AValue);
+  CheckBroker;
+  FBroker.User := AValue;
 end;
 
-function TdConnection.Connect: TdConnection;
+function TdConnection.Connect: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Connect;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Connect;
 end;
 
-function TdConnection.Disconnect: TdConnection;
+function TdConnection.Disconnect: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Disconnect;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Disconnect;
 end;
 
-function TdConnection.StartTransaction: TdConnection;
+function TdConnection.StartTransaction: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.StartTransaction;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.StartTransaction;
 end;
 
-function TdConnection.Commit: TdConnection;
+function TdConnection.Commit: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.Commit');
-  FDef.Commit;
+  FBroker.Commit;
 end;
 
-function TdConnection.CommitRetaining: TdConnection;
+function TdConnection.CommitRetaining: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.CommitRetaining');
-  FDef.CommitRetaining;
+  FBroker.CommitRetaining;
 end;
 
-function TdConnection.Rollback: TdConnection;
+function TdConnection.Rollback: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.Rollback');
-  FDef.Rollback;
+  FBroker.Rollback;
 end;
 
-function TdConnection.RollbackRetaining: TdConnection;
+function TdConnection.RollbackRetaining: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.RollbackRetaining');
-  FDef.RollbackRetaining;
+  FBroker.RollbackRetaining;
 end;
 
 function TdConnection.InTransaction: Boolean;
 begin
-  CheckDef;
-  Result := FDef.InTransaction;
+  CheckBroker;
+  Result := FBroker.InTransaction;
 end;
 
-{ TdQueryDef }
+{ TdQueryBroker }
 
-constructor TdQueryDef.Create;
+constructor TdQueryBroker.Create;
 begin
   inherited Create;
 end;
 
-function TdQueryDef.ApplyUpdates: TdQueryDef;
+function TdQueryBroker.ApplyUpdates: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.CancelUpdates: TdQueryDef;
+function TdQueryBroker.CancelUpdates: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Apply: TdQueryDef;
+function TdQueryBroker.Apply: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.ApplyRetaining: TdQueryDef;
+function TdQueryBroker.ApplyRetaining: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Undo: TdQueryDef;
+function TdQueryBroker.Undo: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.UndoRetaining: TdQueryDef;
+function TdQueryBroker.UndoRetaining: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Append: TdQueryDef;
+function TdQueryBroker.Append: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Insert: TdQueryDef;
+function TdQueryBroker.Insert: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Edit: TdQueryDef;
+function TdQueryBroker.Edit: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Cancel: TdQueryDef;
+function TdQueryBroker.Cancel: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Delete: TdQueryDef;
+function TdQueryBroker.Delete: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Open: TdQueryDef;
+function TdQueryBroker.Open: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Close: TdQueryDef;
+function TdQueryBroker.Close: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Refresh: TdQueryDef;
+function TdQueryBroker.Refresh: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.First: TdQueryDef;
+function TdQueryBroker.First: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Prior: TdQueryDef;
+function TdQueryBroker.Prior: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Next: TdQueryDef;
+function TdQueryBroker.Next: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Last: TdQueryDef;
+function TdQueryBroker.Last: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Post: TdQueryDef;
+function TdQueryBroker.Post: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Execute: TdQueryDef;
+function TdQueryBroker.Execute: TdQueryBroker;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.RowsAffected: Int64;
+function TdQueryBroker.RowsAffected: Int64;
 begin
   Result := 0;
   NotImplementedError;
 end;
 
-function TdQueryDef.Locate(const AKeyFields: string; const AKeyValues: Variant;
-  const AOptions: TLocateOptions): Boolean;
+function TdQueryBroker.Locate(const AKeyFields: string;
+  const AKeyValues: Variant; const AOptions: TLocateOptions): Boolean;
 begin
   Result := False;
   NotImplementedError;
 end;
 
-function TdQueryDef.Param(const AName: string): TParam;
+function TdQueryBroker.Param(const AName: string): TParam;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Field(const AName: string): TField;
+function TdQueryBroker.Field(const AName: string): TField;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.FieldDef(const AName: string): TFieldDef;
+function TdQueryBroker.FieldDef(const AName: string): TFieldDef;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.Count: Int64;
+function TdQueryBroker.Count: Int64;
 begin
   Result := 0;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetBookmark: TBookmark;
+function TdQueryBroker.GetBookmark: TBookmark;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-procedure TdQueryDef.GotoBookmark(ABookmark: TBookmark);
+procedure TdQueryBroker.GotoBookmark(ABookmark: TBookmark);
 begin
   NotImplementedError;
 end;
 
-function TdQueryDef.GetActive: Boolean;
+function TdQueryBroker.GetConnection: TObject;
+begin
+  Result := nil;
+  NotImplementedError;
+end;
+
+function TdQueryBroker.GetActive: Boolean;
 begin
   Result := False;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetBOF: Boolean;
+function TdQueryBroker.GetBOF: Boolean;
 begin
   Result := False;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetConnection: TdConnection;
+function TdQueryBroker.GetDataSet: TDataSet;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetDataSet: TDataSet;
+function TdQueryBroker.GetDataSource: TDataSource;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetDataSource: TDataSource;
-begin
-  Result := nil;
-  NotImplementedError;
-end;
-
-function TdQueryDef.GetEOF: Boolean;
+function TdQueryBroker.GetEOF: Boolean;
 begin
   Result := False;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetFieldDefs: TFieldDefs;
+function TdQueryBroker.GetFieldDefs: TFieldDefs;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetFields: TFields;
+function TdQueryBroker.GetFields: TFields;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetModified: Boolean;
+function TdQueryBroker.GetModified: Boolean;
 begin
   Result := False;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetParams: TParams;
+function TdQueryBroker.GetParams: TParams;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetPosition: Int64;
+function TdQueryBroker.GetPosition: Int64;
 begin
   Result := 0;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetSQL: TStrings;
+function TdQueryBroker.GetSQL: TStrings;
 begin
   Result := nil;
   NotImplementedError;
 end;
 
-function TdQueryDef.GetState: TDataSetState;
+function TdQueryBroker.GetState: TDataSetState;
 begin
   Result := dsInactive;
   NotImplementedError;
 end;
 
-procedure TdQueryDef.SetActive(const AValue: Boolean);
+procedure TdQueryBroker.SetActive(const AValue: Boolean);
 begin
   NotImplementedError;
 end;
 
-procedure TdQueryDef.SetConnection(AValue: TdConnection);
+procedure TdQueryBroker.SetConnection(AValue: TObject);
 begin
   NotImplementedError;
 end;
 
-procedure TdQueryDef.SetDataSource(AValue: TDataSource);
+procedure TdQueryBroker.SetDataSource(AValue: TDataSource);
 begin
   NotImplementedError;
 end;
 
-procedure TdQueryDef.SetPosition(const AValue: Int64);
+procedure TdQueryBroker.SetPosition(const AValue: Int64);
 begin
   NotImplementedError;
 end;
@@ -990,487 +961,334 @@ end;
 constructor TdQuery.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  if AOwner is TdConnection then
-  begin
-    SetDef(TdConnection(AOwner).GetBrokerClass);
-    SetConnection(TdConnection(AOwner));
-  end;
+  CheckBrokerClass;
+  FBroker := T1.Create;
+  FConnection := T2(AOwner);
+  if Assigned(AOwner) then
+    FBroker.Connection := FConnection.Broker.Connection;
 end;
 
 destructor TdQuery.Destroy;
 begin
-  FreeAndNil(FDef);
+  FBroker.Free;
   inherited Destroy;
 end;
 
-procedure TdQuery.SetDef(ABrokerClass: TdBrokerClass);
+procedure TdQuery.CheckBrokerClass;
 begin
-  if not Assigned(ABrokerClass) then
-    raise EdQuery.Create('Broker class must not be nil.');
-  FreeAndNil(FDef);
-  FBrokerClass := ABrokerClass;
-  FDef := FBrokerClass.GetQueryDefClass.Create;
+  if not T1.InheritsFrom(TdQueryBroker) then
+    raise EdQuery.CreateFmt('Invalid broker class: "%s".', [T1.ClassName]);
 end;
 
-function TdQuery.GetFields(AObject: TObject): TdQuery;
-var
-  I: Integer;
-  F: TField;
-  PI: PPropInfo;
+procedure TdQuery.CheckBroker;
 begin
-  Result := Self;
-  Connection.Logger.Log(ltCustom, 'Trying Query.GetFields');
-  for I := 0 to Pred(Fields.Count) do
-  begin
-    F := Fields[I];
-    PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), F.FieldName);
-    if not Assigned(PI) then
-      Continue;
-    case F.DataType of
-      ftFixedWideChar, ftWideString, ftFixedChar,
-        ftString: SetStrProp(AObject, PI, F.AsString);
-      ftSmallInt, ftInteger, ftAutoInc,
-        ftWord: SetOrdProp(AObject, PI, F.AsInteger);
-      ftLargeInt: SetInt64Prop(AObject, PI, F.AsLargeInt);
-      ftFloat: SetFloatProp(AObject, PI, F.AsFloat);
-      ftBoolean: SetOrdProp(AObject, PI, Ord(F.AsBoolean));
-      ftDate, ftTime, ftDateTime: SetFloatProp(AObject, PI, F.AsDateTime);
-    end;
-  end;
+  if FBroker = nil then
+    raise EdQuery.Create('Broker not assigned.');
 end;
 
-function TdQuery.GetParams(AObject: TObject): TdQuery;
-var
-  I: Integer;
-  P: TParam;
-  PI: PPropInfo;
+procedure TdQuery.CheckConnection;
 begin
-  Result := Self;
-  Connection.Logger.Log(ltCustom, 'Trying Query.GetParams');
-  for I := 0 to Pred(Params.Count) do
-  begin
-    P := Params[I];
-    PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), P.Name);
-    if not Assigned(PI) then
-      Continue;
-    case P.DataType of
-      ftFixedWideChar, ftWideString, ftFixedChar,
-        ftString: SetStrProp(AObject, PI, P.AsString);
-      ftSmallInt, ftInteger, ftAutoInc,
-        ftWord: SetOrdProp(AObject, PI, P.AsInteger);
-      ftLargeInt: SetInt64Prop(AObject, PI, P.AsLargeInt);
-      ftFloat: SetFloatProp(AObject, PI, P.AsFloat);
-      ftBoolean: SetOrdProp(AObject, PI, Ord(P.AsBoolean));
-      ftDate, ftTime, ftDateTime: SetFloatProp(AObject, PI, P.AsDateTime);
-    end;
-  end;
-end;
-
-function TdQuery.SetFields(AObject: TObject): TdQuery;
-var
-  C, I: Integer;
-  F: TField;
-  PI: PPropInfo;
-  PL: PPropList = nil;
-begin
-  Result := Self;
-  Connection.Logger.Log(ltCustom, 'Trying Query.SetFields');
-  C := GetPropList(PTypeInfo(AObject.ClassInfo), PL);
-  if Assigned(PL) then
-    try
-      for I := 0 to Pred(C) do
-      begin
-        PI := PL^[I];
-        F := Fields.FindField(PI^.Name);
-        if not Assigned(F) then
-          Continue;
-        case PI^.PropType^.Kind of
-          tkAString: F.AsString := GetStrProp(AObject, PI);
-          tkChar: PChar(F.AsString)^ := Char(GetOrdProp(AObject, PI));
-          tkInteger: F.AsInteger := GetOrdProp(AObject, PI);
-          tkInt64, tkQWord: F.AsLargeInt := GetInt64Prop(AObject, PI);
-          tkBool: F.AsBoolean := GetOrdProp(AObject, PI) <> 0;
-          tkFloat: F.AsFloat := GetFloatProp(AObject, PI);
-          tkEnumeration: F.AsString := GetEnumProp(AObject, PI);
-          tkSet: F.AsString := GetSetProp(AObject, PI, False);
-        end;
-      end;
-    finally
-      FreeMem(PL);
-    end;
-end;
-
-function TdQuery.SetParams(AObject: TObject): TdQuery;
-var
-  C, I: Integer;
-  P: TParam;
-  PI: PPropInfo;
-  PL: PPropList = nil;
-begin
-  Result := Self;
-  Connection.Logger.Log(ltCustom, 'Trying Query.SetParams');
-  C := GetPropList(PTypeInfo(AObject.ClassInfo), PL);
-  if Assigned(PL) then
-    try
-      for I := 0 to Pred(C) do
-      begin
-        PI := PL^[I];
-        P := Params.FindParam(PI^.Name);
-        if not Assigned(P) then
-          Continue;
-        case PI^.PropType^.Kind of
-          tkAString: P.AsString := GetStrProp(AObject, PI);
-          tkChar: PChar(P.AsString)^ := Char(GetOrdProp(AObject, PI));
-          tkInteger: P.AsInteger := GetOrdProp(AObject, PI);
-          tkInt64, tkQWord: P.AsLargeInt := GetInt64Prop(AObject, PI);
-          tkBool: P.AsBoolean := GetOrdProp(AObject, PI) <> 0;
-          tkFloat: P.AsFloat := GetFloatProp(AObject, PI);
-          tkEnumeration: P.AsString := GetEnumProp(AObject, PI);
-          tkSet: P.AsString := GetSetProp(AObject, PI, False);
-        end;
-      end;
-    finally
-      FreeMem(PL);
-    end;
-end;
-
-procedure TdQuery.CheckDef;
-begin
-  if not Assigned(FDef) then
-    raise EdQuery.Create('Definition is not set.');
-end;
-
-function TdQuery.GetParameterizedSQL: string;
-var
-  V: string;
-  I: Integer;
-  P: TParam;
-begin
-  Result := Trim(SQL.Text);
-  for I := 0 to Pred(Params.Count) do
-  begin
-    P := Params[I];
-    V := P.AsString;
-    case P.DataType of
-      ftString, ftDate, ftTime, ftDateTime, ftMemo, ftFixedChar, ftGuid:
-        V := QuotedStr(V);
-      ftCurrency: V := FloatToStr(P.AsFloat);
-    end;
-    Result := StringReplace(Result, ':' + P.Name, V, [rfIgnoreCase, rfReplaceAll]);
-  end;
+  if FConnection = nil then
+    raise EdQuery.Create('Connection not assigned.');
 end;
 
 function TdQuery.GetActive: Boolean;
 begin
-  CheckDef;
-  Result := FDef.GetActive;
+  CheckBroker;
+  Result := FBroker.Active;
 end;
 
 function TdQuery.GetBOF: Boolean;
 begin
-  CheckDef;
-  Result := FDef.GetBOF;
-end;
-
-function TdQuery.GetConnection: TdConnection;
-begin
-  CheckDef;
-  Result := FDef.GetConnection;
+  CheckBroker;
+  Result := FBroker.BOF;
 end;
 
 function TdQuery.GetDataSet: TDataSet;
 begin
-  CheckDef;
-  Result := FDef.GetDataSet;
+  CheckBroker;
+  Result := FBroker.DataSet;
 end;
 
 function TdQuery.GetDataSource: TDataSource;
 begin
-  CheckDef;
-  Result := FDef.GetDataSource;
+  CheckBroker;
+  Result := FBroker.DataSource;
 end;
 
 function TdQuery.GetEOF: Boolean;
 begin
-  CheckDef;
-  Result := FDef.GetEOF;
+  CheckBroker;
+  Result := FBroker.EOF;
 end;
 
 function TdQuery.GetFieldDefs: TFieldDefs;
 begin
-  CheckDef;
-  Result := FDef.GetFieldDefs;
+  CheckBroker;
+  Result := FBroker.FieldDefs;
 end;
 
 function TdQuery.GetFields: TFields;
 begin
-  CheckDef;
-  Result := FDef.GetFields;
+  CheckBroker;
+  Result := FBroker.Fields;
 end;
 
 function TdQuery.GetModified: Boolean;
 begin
-  CheckDef;
-  Result := FDef.GetModified;
+  CheckBroker;
+  Result := FBroker.Modified;
 end;
 
 function TdQuery.GetParams: TParams;
 begin
-  CheckDef;
-  Result := FDef.GetParams;
+  CheckBroker;
+  Result := FBroker.Params;
 end;
 
 function TdQuery.GetPosition: Int64;
 begin
-  CheckDef;
-  Result := FDef.GetPosition;
+  CheckBroker;
+  Result := FBroker.Position;
 end;
 
 function TdQuery.GetSQL: TStrings;
 begin
-  CheckDef;
-  Result := FDef.GetSQL;
+  CheckBroker;
+  Result := FBroker.SQL;
 end;
 
 function TdQuery.GetState: TDataSetState;
 begin
-  CheckDef;
-  Result := FDef.GetState;
+  CheckBroker;
+  Result := FBroker.State;
 end;
 
 procedure TdQuery.SetActive(const AValue: Boolean);
 begin
-  CheckDef;
-  FDef.SetActive(AValue);
-end;
-
-procedure TdQuery.SetConnection(AValue: TdConnection);
-begin
-  CheckDef;
-  FDef.SetConnection(AValue);
+  CheckBroker;
+  FBroker.Active := AValue;
 end;
 
 procedure TdQuery.SetDataSource(AValue: TDataSource);
 begin
-  CheckDef;
-  FDef.SetDataSource(AValue);
+  CheckBroker;
+  FBroker.DataSource := AValue;
 end;
 
 procedure TdQuery.SetPosition(const AValue: Int64);
 begin
-  CheckDef;
-  FDef.SetPosition(AValue);
+  CheckBroker;
+  FBroker.Position := AValue;
 end;
 
-function TdQuery.ApplyUpdates: TdQuery;
+function TdQuery.ApplyUpdates: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
+  CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.ApplyUpdates');
-  FDef.ApplyUpdates;
+  FBroker.ApplyUpdates;
 end;
 
-function TdQuery.CancelUpdates: TdQuery;
+function TdQuery.CancelUpdates: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
+  CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.CancelUpdates');
-  FDef.CancelUpdates;
+  FBroker.CancelUpdates;
 end;
 
-function TdQuery.Apply: TdQuery;
+function TdQuery.Apply: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
+  CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.Apply');
-  FDef.Apply;
+  FBroker.Apply;
 end;
 
-function TdQuery.ApplyRetaining: TdQuery;
+function TdQuery.ApplyRetaining: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
+  CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.ApplyRetaining');
-  FDef.ApplyRetaining;
+  FBroker.ApplyRetaining;
 end;
 
-function TdQuery.Undo: TdQuery;
+function TdQuery.Undo: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
+  CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.Undo');
-  FDef.Undo;
+  FBroker.Undo;
 end;
 
-function TdQuery.UndoRetaining: TdQuery;
+function TdQuery.UndoRetaining: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
+  CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.UndoRetaining');
-  FDef.UndoRetaining;
+  FBroker.UndoRetaining;
 end;
 
-function TdQuery.Append: TdQuery;
+function TdQuery.Append: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Append;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Append;
 end;
 
-function TdQuery.Insert: TdQuery;
+function TdQuery.Insert: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Insert;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Insert;
 end;
 
-function TdQuery.Edit: TdQuery;
+function TdQuery.Edit: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Edit;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Edit;
 end;
 
-function TdQuery.Cancel: TdQuery;
+function TdQuery.Cancel: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Cancel;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Cancel;
 end;
 
-function TdQuery.Delete: TdQuery;
+function TdQuery.Delete: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Delete;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Delete;
 end;
 
-function TdQuery.Open: TdQuery;
+function TdQuery.Open: T1;
 begin
-  Result := Self;
-  CheckDef;
+  Result := FBroker;
+  CheckBroker;
+  CheckConnection;
   Connection.Logger.Log(ltSQL, Trim(SQL.Text));
-  FDef.Open;
+  FBroker.Open;
 end;
 
-function TdQuery.Close: TdQuery;
+function TdQuery.Close: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Close;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Close;
 end;
 
-function TdQuery.Refresh: TdQuery;
+function TdQuery.Refresh: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Refresh;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Refresh;
 end;
 
-function TdQuery.First: TdQuery;
+function TdQuery.First: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.First;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.First;
 end;
 
-function TdQuery.Prior: TdQuery;
+function TdQuery.Prior: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Prior;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Prior;
 end;
 
-function TdQuery.Next: TdQuery;
+function TdQuery.Next: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Next;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Next;
 end;
 
-function TdQuery.Last: TdQuery;
+function TdQuery.Last: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Last;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Last;
 end;
 
-function TdQuery.Post: TdQuery;
+function TdQuery.Post: T1;
 begin
-  Result := Self;
-  CheckDef;
-  FDef.Post;
+  Result := FBroker;
+  CheckBroker;
+  FBroker.Post;
 end;
 
-function TdQuery.Execute: TdQuery;
+function TdQuery.Execute: T1;
+var
+  S: string;
 begin
-  Result := Self;
-  CheckDef;
-  Connection.Logger.Log(ltSQL, GetParameterizedSQL);
-  FDef.Execute;
+  Result := FBroker;
+  CheckBroker;
+  CheckConnection;
+  S := Trim(SQL.Text);
+  GetParameterizeSQL(S, Params);
+  Connection.Logger.Log(ltSQL, S);
+  FBroker.Execute;
 end;
 
 function TdQuery.RowsAffected: Int64;
 begin
-  CheckDef;
-  Result := FDef.RowsAffected;
+  CheckBroker;
+  Result := FBroker.RowsAffected;
 end;
 
 function TdQuery.Locate(const AKeyFields: string; const AKeyValues: Variant;
   const AOptions: TLocateOptions): Boolean;
 begin
-  CheckDef;
-  Result := FDef.Locate(AKeyFields, AKeyValues, AOptions);
+  CheckBroker;
+  Result := FBroker.Locate(AKeyFields, AKeyValues, AOptions);
 end;
 
 function TdQuery.Param(const AName: string): TParam;
 begin
-  CheckDef;
-  Result := FDef.Param(AName);
+  CheckBroker;
+  Result := FBroker.Param(AName);
 end;
 
 function TdQuery.Field(const AName: string): TField;
 begin
-  CheckDef;
-  Result := FDef.Field(AName);
+  CheckBroker;
+  Result := FBroker.Field(AName);
 end;
 
 function TdQuery.FieldDef(const AName: string): TFieldDef;
 begin
-  CheckDef;
-  Result := FDef.FieldDef(AName);
+  CheckBroker;
+  Result := FBroker.FieldDef(AName);
 end;
 
 function TdQuery.Count: Int64;
 begin
-  CheckDef;
-  Result := FDef.Count;
+  CheckBroker;
+  Result := FBroker.Count;
 end;
 
 function TdQuery.GetBookmark: TBookmark;
 begin
-  CheckDef;
-  Result := FDef.GetBookmark;
+  CheckBroker;
+  Result := FBroker.Bookmark;
 end;
 
 procedure TdQuery.GotoBookmark(ABookmark: TBookmark);
 begin
-  CheckDef;
-  FDef.GotoBookmark(ABookmark);
-end;
-
-{ TdBroker }
-
-class function TdBroker.GetConnectionDefClass: TdConnectionDefClass;
-begin
-  Result := nil;
-  NotImplementedError;
-end;
-
-class function TdBroker.GetQueryDefClass: TdQueryDefClass;
-begin
-  Result := nil;
-  NotImplementedError;
+  CheckBroker;
+  FBroker.GotoBookmark(ABookmark);
 end;
 
 end.
