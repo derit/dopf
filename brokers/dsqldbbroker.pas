@@ -125,6 +125,11 @@ type
   TdSQLdbQuery = class(specialize TdQuery<TdSQLdbQueryBroker, TdSQLdbConnector>)
   end;
 
+  { TdSQLdbEntity }
+
+  generic TdSQLdbEntity<T1, T2> = class(specialize TdEntityQuery<TdSQLdbQueryBroker, T1, T2>)
+  end;
+
 implementation
 
 { TdSQLdbConnectionBroker }

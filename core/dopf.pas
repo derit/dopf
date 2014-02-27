@@ -288,6 +288,24 @@ type
     property Position: Int64 read GetPosition write SetPosition;
   end;
 
+  { TdEntityQuery }
+
+  generic TdEntityQuery<T1, T2, T3> = class(specialize TdQuery<T1, T2>)
+  private
+    FEntity: T3;
+  protected
+    function CreateEntity: T3; virtual;
+    procedure FreeEntity; virtual;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    function GetFields: T1;
+    function SetFields: T1;
+    function GetParams: T1;
+    function SetParams: T1;
+    property Entity: T3 read FEntity write FEntity;
+  end;
+
 implementation
 
 procedure NotImplementedError;
@@ -1289,6 +1307,54 @@ procedure TdQuery.GotoBookmark(ABookmark: TBookmark);
 begin
   CheckBroker;
   FBroker.GotoBookmark(ABookmark);
+end;
+
+{ TdEntityQuery }
+
+constructor TdEntityQuery.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FEntity := CreateEntity;
+end;
+
+destructor TdEntityQuery.Destroy;
+begin
+  FreeEntity;
+  inherited Destroy;
+end;
+
+function TdEntityQuery.CreateEntity: T3;
+begin
+  Result := T3.Create;
+end;
+
+procedure TdEntityQuery.FreeEntity;
+begin
+  FreeAndNil(FEntity);
+end;
+
+function TdEntityQuery.GetFields: T1;
+begin
+  Result := Broker;
+  dGetFields(FEntity, Fields);
+end;
+
+function TdEntityQuery.SetFields: T1;
+begin
+  Result := Broker;
+  dSetFields(FEntity, Fields);
+end;
+
+function TdEntityQuery.GetParams: T1;
+begin
+  Result := Broker;
+  dGetParams(FEntity, Params);
+end;
+
+function TdEntityQuery.SetParams: T1;
+begin
+  Result := Broker;
+  dSetParams(FEntity, Params);
 end;
 
 end.
