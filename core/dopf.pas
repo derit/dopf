@@ -1336,24 +1336,28 @@ end;
 function TdEntityQuery.GetFields: T1;
 begin
   Result := Broker;
+  Connection.Logger.Log(ltCustom, 'Trying Query.GetFields');
   dGetFields(FEntity, Fields);
 end;
 
 function TdEntityQuery.SetFields: T1;
 begin
   Result := Broker;
+  Connection.Logger.Log(ltCustom, 'Trying Query.SetFields');
   dSetFields(FEntity, Fields);
 end;
 
 function TdEntityQuery.GetParams: T1;
 begin
   Result := Broker;
+  Connection.Logger.Log(ltCustom, 'Trying Query.GetParams');
   dGetParams(FEntity, Params);
 end;
 
 function TdEntityQuery.SetParams: T1;
 begin
   Result := Broker;
+  Connection.Logger.Log(ltCustom, 'Trying Query.SetParams');
   dSetParams(FEntity, Params);
 end;
 

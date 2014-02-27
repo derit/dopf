@@ -3,9 +3,6 @@ program demo1;
 {$mode objfpc}{$H+}
 
 uses
-{$IFDEF DEBUG}
-  heaptrc,
-{$ENDIF}
   dSQLdbBroker, person, sysutils, pqconnection;
 
 type
@@ -16,8 +13,6 @@ type
   end;
 
 var
-  i: Integer;
-  b, e: TDateTime;
   con: Tcon;
   qry: Tqry;
 begin
@@ -54,25 +49,9 @@ begin
     end;
     qry.Open.Apply;
 
-    qry.Open.First;
-    b := Now;
-    for i := 1 to 1000000 do
-    begin
-      qry.Entity.Id := 0;
-      qry.Entity.Name := '';
-      qry.GetFields;
-    end;
-    e := Now;
-    WriteLn('Performance: ', FormatDateTime('hh:nn:ss.zzz', e - b));
-
     ReadLn;
   finally
     con.Free;
   end;
-{$IFDEF DEBUG}
-  DeleteFile('HEAP.TXT');
-  SetHeapTraceOutput('HEAP.TXT');
-  Sleep(1000);
-{$ENDIF}
 end.
 
