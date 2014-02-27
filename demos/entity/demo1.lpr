@@ -6,7 +6,7 @@ uses
 {$IFDEF DEBUG}
   heaptrc,
 {$ENDIF}
-  dOPF, dUtils, dSQLdbBroker, person, sysutils, pqconnection;
+  dSQLdbBroker, person, sysutils, pqconnection;
 
 type
   Tcon = class(TdSQLdbConnector)
@@ -25,7 +25,6 @@ begin
   qry := Tqry.Create(con);
   try
     con.Logger.Active := True;
-    con.Logger.Filter := [ltSQL];
     con.Logger.FileName := 'OUTPUT.LOG';
     con.Driver := 'postgresql';
     con.Host := '127.0.0.1';

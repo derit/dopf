@@ -6,7 +6,7 @@ uses
 {$IFDEF DEBUG}
   heaptrc,
 {$ENDIF}
-  dOPF, dUtils, dSQLdbBroker, person, sysutils, pqconnection;
+  dUtils, dSQLdbBroker, person, sysutils, pqconnection;
 
 var
   i: Integer;
@@ -20,7 +20,6 @@ begin
   per := TPerson.Create;
   try
     con.Logger.Active := True;
-    con.Logger.Filter := [ltSQL];
     con.Logger.FileName := 'OUTPUT.LOG';
     con.Driver := 'postgresql';
     con.Host := '127.0.0.1';
