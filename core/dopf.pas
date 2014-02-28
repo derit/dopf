@@ -1145,10 +1145,14 @@ begin
 end;
 
 procedure TdGQuery.Open;
+var
+  S: string;
 begin
   CheckBroker;
   CheckConnection;
-  Connection.Logger.Log(ltSQL, Trim(SQL.Text));
+  S := Trim(SQL.Text);
+  dParameterizeSQL(S, Params);
+  Connection.Logger.Log(ltSQL, S);
   FBroker.Open;
 end;
 
