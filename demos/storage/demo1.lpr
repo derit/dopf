@@ -44,6 +44,11 @@ begin
     storage.Add(per);
     WriteLn('Done.');
 
+    WriteLn('Add Sven Barth');
+    per.Name := 'Sven Barth';
+    storage.Add(per);
+    WriteLn('Done.');
+
     WriteLn('Modify name of Waldir to Waldir Paim');
     per.Id := 1001;
     per.Name := 'Waldir Paim';
