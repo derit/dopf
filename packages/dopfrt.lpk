@@ -22,7 +22,7 @@
     <Description Value="Duall Sistemas, Object Persistence Framework."/>
     <License Value="See the file LICENSE, included in this distribution, for details about the copyright."/>
     <Version Major="3"/>
-    <Files Count="6">
+    <Files Count="7">
       <Item1>
         <Filename Value="..\brokers\dsqldbbroker.pas"/>
         <UnitName Value="dSQLdbBroker"/>
@@ -44,9 +44,13 @@
         <UnitName Value="dSqlBuilder"/>
       </Item5>
       <Item6>
+        <Filename Value="..\core\dstorage.pas"/>
+        <UnitName Value="dStorage"/>
+      </Item6>
+      <Item7>
         <Filename Value="..\core\dutils.pas"/>
         <UnitName Value="dUtils"/>
-      </Item6>
+      </Item7>
     </Files>
     <Type Value="RunTimeOnly"/>
     <RequiredPkgs Count="1">
