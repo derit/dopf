@@ -52,7 +52,7 @@ begin
       WriteLn('Record: ', qry.Entity.id, ', ', qry.Entity.Name);
       qry.Next;
     end;
-    qry.Open;
+
     qry.Apply;
 
     ReadLn;

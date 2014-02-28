@@ -52,10 +52,7 @@ begin
       WriteLn('Record: ', per.id, ', ', per.Name);
       qry.Next;
     end;
-    qry.Open;
-    qry.Apply;
 
-    qry.Open;
     qry.First;
     b := Now;
     for i := 1 to 1000000 do
@@ -66,6 +63,8 @@ begin
     end;
     e := Now;
     WriteLn('Performance: ', FormatDateTime('hh:nn:ss.zzz', e - b));
+
+    qry.Apply;
 
     ReadLn;
   finally
