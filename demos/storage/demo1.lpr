@@ -81,7 +81,7 @@ begin
     WriteLn('Done.');
 
     WriteLn('List all');
-    storage.List(per, pers);
+    storage.List(pers);
     for i in pers do
       WriteLn(i.Id, ', ', i.Name);
     pers.Clear;

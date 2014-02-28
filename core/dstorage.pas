@@ -43,6 +43,10 @@ type
     procedure CheckEntities({%H-}AEntities: TEntities);
     function InternalFind({%H-}ATable: TTable; {%H-}AEntity: T3;
       const ACondition: string): Boolean;
+    procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
+    procedure SetSql(const ASql: string); virtual;
+    procedure SetParams({%H-}AEntity: T3); virtual;
+    procedure GetFields({%H-}AEntity: T3); virtual;
     property Query: T2 read FQuery;
   public
     constructor Create(AConnection: T1;
@@ -53,6 +57,7 @@ type
       const ACondition: string): Boolean; overload;
     function List(AEntity: T3; AEntities: TEntities;
       const ASql: string = ''): Boolean;
+    function List(AEntities: TEntities; const ASql: string = ''): Boolean;
     procedure Add(AEntity: T3;
       {%H-}const AIgnorePrimaryKeys: Boolean = True); virtual;
     procedure Modify(AEntity: T3;
@@ -93,8 +98,7 @@ end;
 
 procedure TdGStorage.Empty;
 begin
-  FQuery.Close;
-  FQuery.SQL.Text := 'delete from ' + FTableName;
+  SetSql('delete from ' + FTableName);
   FQuery.Execute;
 end;
 
@@ -104,15 +108,44 @@ var
   FS: string = '';
 begin
   TSelectBuilder.MakeFields(ATable, FS, True);
-  FQuery.Close;
-  FQuery.SQL.Text := 'select ' + FS + ' from ' + FTableName;
+  SetSql('select ' + FS + ' from ' + FTableName);
   if ACondition <> '' then
     FQuery.SQL.Add('where ' + ACondition);
-  dUtils.dSetParams(AEntity, FQuery.Params);
+  SetParams(AEntity);
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
-    dUtils.dGetFields(AEntity, FQuery.Fields);
+    GetFields(AEntity);
+end;
+
+procedure TdGStorage.PopulateEntities(AEntities: TEntities);
+var
+  E: T3;
+begin
+  FQuery.First;
+  while not FQuery.EOF do
+  begin
+    E := T3.Create;
+    GetFields(E);
+    AEntities.Add(E);
+    FQuery.Next;
+  end;
+end;
+
+procedure TdGStorage.SetSql(const ASql: string);
+begin
+  FQuery.Close;
+  FQuery.SQL.Text := ASql;
+end;
+
+procedure TdGStorage.SetParams(AEntity: T3);
+begin
+  dUtils.dSetParams(AEntity, FQuery.Params);
+end;
+
+procedure TdGStorage.GetFields(AEntity: T3);
+begin
+  dUtils.dGetFields(AEntity, FQuery.Fields);
 end;
 
 function TdGStorage.Get(AEntity: T3): Boolean;
@@ -147,7 +180,6 @@ end;
 function TdGStorage.Find(AEntity: T3; AEntities: TEntities;
   const ACondition: string): Boolean;
 var
-  E: T3;
   T: TTable;
 begin
   CheckEntity(AEntity);
@@ -156,16 +188,7 @@ begin
   try
     Result := InternalFind(T, AEntity, ACondition);
     if Result then
-    begin
-      FQuery.First;
-      while not FQuery.EOF do
-      begin
-        E := T3.Create;
-        dUtils.dGetFields(E, FQuery.Fields);
-        AEntities.Add(E);
-        FQuery.Next;
-      end;
-    end;
+      PopulateEntities(AEntities);
   finally
     T.Free;
   end;
@@ -176,7 +199,6 @@ end;
 function TdGStorage.List(AEntity: T3; AEntities: TEntities;
   const ASql: string): Boolean;
 var
-  E: T3;
   T: TTable;
   FS: string = '';
 begin
@@ -184,30 +206,46 @@ begin
   CheckEntities(AEntities);
   T := TTable.Create;
   try
-    FQuery.Close;
     if ASql = '' then
     begin
       TSelectBuilder.MakeFields(T, FS, True);
-      FQuery.SQL.Text := 'select ' + FS + ' from ' + FTableName;
+      SetSql('select ' + FS + ' from ' + FTableName);
     end
     else
-      FQuery.SQL.Text := ASql;
-    dUtils.dSetParams(AEntity, FQuery.Params);
+      SetSql(ASql);
+    SetParams(AEntity);
     FQuery.Open;
     Result := FQuery.Count > 0;
     if Result then
-      dUtils.dGetFields(AEntity, FQuery.Fields);
+      GetFields(AEntity);
     if Result then
+      PopulateEntities(AEntities);
+  finally
+    T.Free;
+  end;
+end;
+{$NOTES ON}
+
+{$NOTES OFF}
+function TdGStorage.List(AEntities: TEntities; const ASql: string): Boolean;
+var
+  T: TTable;
+  FS: string = '';
+begin
+  CheckEntities(AEntities);
+  T := TTable.Create;
+  try
+    if ASql = '' then
     begin
-      FQuery.First;
-      while not FQuery.EOF do
-      begin
-        E := T3.Create;
-        dUtils.dGetFields(E, FQuery.Fields);
-        AEntities.Add(E);
-        FQuery.Next;
-      end;
-    end;
+      TSelectBuilder.MakeFields(T, FS, True);
+      SetSql('select ' + FS + ' from ' + FTableName);
+    end
+    else
+      SetSql(ASql);
+    FQuery.Open;
+    Result := FQuery.Count > 0;
+    if Result then
+      PopulateEntities(AEntities);
   finally
     T.Free;
   end;
@@ -217,7 +255,7 @@ end;
 {$NOTES OFF}
 procedure TdGStorage.Add(AEntity: T3; const AIgnorePrimaryKeys: Boolean);
 var
-  S: string;
+  S: string = '';
   B: TInsertBuilder;
 begin
   CheckEntity(AEntity);
@@ -225,9 +263,8 @@ begin
   try
     B.Table.Name := FTableName;
     B.Build(S, AIgnorePrimaryKeys);
-    FQuery.Close;
-    FQuery.SQL.Text := S;
-    dUtils.dSetParams(AEntity, FQuery.Params);
+    SetSql(S);
+    SetParams(AEntity);
     FQuery.Execute;
   finally
     B.Free;
@@ -238,7 +275,7 @@ end;
 {$NOTES OFF}
 procedure TdGStorage.Modify(AEntity: T3; const AIgnorePrimaryKeys: Boolean);
 var
-  S: string;
+  S: string = '';
   B: TUpdateBuilder;
 begin
   CheckEntity(AEntity);
@@ -246,9 +283,8 @@ begin
   try
     B.Table.Name := FTableName;
     B.Build(S, AIgnorePrimaryKeys);
-    FQuery.Close;
-    FQuery.SQL.Text := S;
-    dUtils.dSetParams(AEntity, FQuery.Params);
+    SetSql(S);
+    SetParams(AEntity);
     FQuery.Execute;
   finally
     B.Free;
@@ -259,7 +295,7 @@ end;
 {$NOTES OFF}
 procedure TdGStorage.Remove(AEntity: T3; const AIgnoreProperties: Boolean);
 var
-  S: string;
+  S: string = '';
   B: TDeleteBuilder;
 begin
   CheckEntity(AEntity);
@@ -267,9 +303,8 @@ begin
   try
     B.Table.Name := FTableName;
     B.Build(S, AIgnoreProperties);
-    FQuery.Close;
-    FQuery.SQL.Text := S;
-    dUtils.dSetParams(AEntity, FQuery.Params);
+    SetSql(S);
+    SetParams(AEntity);
     FQuery.Execute;
   finally
     B.Free;
