@@ -98,9 +98,9 @@ type
     property Port: Integer read GetPort write SetPort;
   end;
 
-  { TdConnection }
+  { TdGConnection }
 
-  generic TdConnection<T1, T2> = class(TdComponent)
+  generic TdGConnection<T1, T2> = class(TdComponent)
   private
     FBroker: T1;
     FLogger: T2;
@@ -214,9 +214,9 @@ type
     property Connection: TObject read GetConnection write SetConnection;
   end;
 
-  { TdQuery }
+  { TdGQuery }
 
-  generic TdQuery<T1, T2> = class(TdComponent)
+  generic TdGQuery<T1, T2> = class(TdComponent)
   private
     FBroker: T1;
     FConnection: T2;
@@ -288,9 +288,9 @@ type
     property Position: Int64 read GetPosition write SetPosition;
   end;
 
-  { TdEntityQuery }
+  { TdGEntityQuery }
 
-  generic TdEntityQuery<T1, T2, T3> = class(specialize TdQuery<T1, T2>)
+  generic TdGEntityQuery<T1, T2, T3> = class(specialize TdGQuery<T1, T2>)
   private
     FEntity: T3;
   protected
@@ -515,9 +515,9 @@ begin
   NotImplementedError;
 end;
 
-{ TdConnection }
+{ TdGConnection }
 
-constructor TdConnection.Create(AOwner: TComponent);
+constructor TdGConnection.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   CheckBrokerClass;
@@ -526,162 +526,162 @@ begin
   FLogger := T2.Create('');
 end;
 
-destructor TdConnection.Destroy;
+destructor TdGConnection.Destroy;
 begin
   FBroker.Free;
   FLogger.Free;
   inherited Destroy;
 end;
 
-procedure TdConnection.CheckBrokerClass;
+procedure TdGConnection.CheckBrokerClass;
 begin
   if not T1.InheritsFrom(TdConnectionBroker) then
     raise EdConnection.CreateFmt('Invalid broker class: "%s".', [T1.ClassName]);
 end;
 
-procedure TdConnection.CheckBroker;
+procedure TdGConnection.CheckBroker;
 begin
   if FBroker = nil then
     raise EdConnection.Create('Broker not assigned.');
 end;
 
-procedure TdConnection.CheckLoggerClass;
+procedure TdGConnection.CheckLoggerClass;
 begin
   if not T2.InheritsFrom(TdLogger) then
     raise EdConnection.CreateFmt('Invalid logger class: "%s".', [T2.ClassName]);
 end;
 
-function TdConnection.GetConnected: Boolean;
+function TdGConnection.GetConnected: Boolean;
 begin
   CheckBroker;
   Result := FBroker.Connected;
 end;
 
-function TdConnection.GetDatabase: string;
+function TdGConnection.GetDatabase: string;
 begin
   CheckBroker;
   Result := FBroker.Database;
 end;
 
-function TdConnection.GetDriver: string;
+function TdGConnection.GetDriver: string;
 begin
   CheckBroker;
   Result := FBroker.Driver;
 end;
 
-function TdConnection.GetHost: string;
+function TdGConnection.GetHost: string;
 begin
   CheckBroker;
   Result := FBroker.Host;
 end;
 
-function TdConnection.GetPassword: string;
+function TdGConnection.GetPassword: string;
 begin
   CheckBroker;
   Result := FBroker.Password;
 end;
 
-function TdConnection.GetPort: Integer;
+function TdGConnection.GetPort: Integer;
 begin
   CheckBroker;
   Result := FBroker.Port;
 end;
 
-function TdConnection.GetUser: string;
+function TdGConnection.GetUser: string;
 begin
   CheckBroker;
   Result := FBroker.User;
 end;
 
-procedure TdConnection.SetConnected(const AValue: Boolean);
+procedure TdGConnection.SetConnected(const AValue: Boolean);
 begin
   CheckBroker;
   FBroker.Connected := AValue;
 end;
 
-procedure TdConnection.SetDatabase(const AValue: string);
+procedure TdGConnection.SetDatabase(const AValue: string);
 begin
   CheckBroker;
   FBroker.Database := AValue;
 end;
 
-procedure TdConnection.SetDriver(const AValue: string);
+procedure TdGConnection.SetDriver(const AValue: string);
 begin
   CheckBroker;
   FBroker.Driver := AValue;
 end;
 
-procedure TdConnection.SetHost(const AValue: string);
+procedure TdGConnection.SetHost(const AValue: string);
 begin
   CheckBroker;
   FBroker.Host := AValue;
 end;
 
-procedure TdConnection.SetPassword(const AValue: string);
+procedure TdGConnection.SetPassword(const AValue: string);
 begin
   CheckBroker;
   FBroker.Password := AValue;
 end;
 
-procedure TdConnection.SetPort(const AValue: Integer);
+procedure TdGConnection.SetPort(const AValue: Integer);
 begin
   CheckBroker;
   FBroker.Port := AValue;
 end;
 
-procedure TdConnection.SetUser(const AValue: string);
+procedure TdGConnection.SetUser(const AValue: string);
 begin
   CheckBroker;
   FBroker.User := AValue;
 end;
 
-procedure TdConnection.Connect;
+procedure TdGConnection.Connect;
 begin
   CheckBroker;
   FBroker.Connect;
 end;
 
-procedure TdConnection.Disconnect;
+procedure TdGConnection.Disconnect;
 begin
   CheckBroker;
   FBroker.Disconnect;
 end;
 
-procedure TdConnection.StartTransaction;
+procedure TdGConnection.StartTransaction;
 begin
   CheckBroker;
   FBroker.StartTransaction;
 end;
 
-procedure TdConnection.Commit;
+procedure TdGConnection.Commit;
 begin
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.Commit');
   FBroker.Commit;
 end;
 
-procedure TdConnection.CommitRetaining;
+procedure TdGConnection.CommitRetaining;
 begin
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.CommitRetaining');
   FBroker.CommitRetaining;
 end;
 
-procedure TdConnection.Rollback;
+procedure TdGConnection.Rollback;
 begin
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.Rollback');
   FBroker.Rollback;
 end;
 
-procedure TdConnection.RollbackRetaining;
+procedure TdGConnection.RollbackRetaining;
 begin
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.RollbackRetaining');
   FBroker.RollbackRetaining;
 end;
 
-function TdConnection.InTransaction: Boolean;
+function TdGConnection.InTransaction: Boolean;
 begin
   CheckBroker;
   Result := FBroker.InTransaction;
@@ -940,9 +940,9 @@ begin
   NotImplementedError;
 end;
 
-{ TdQuery }
+{ TdGQuery }
 
-constructor TdQuery.Create(AOwner: TComponent);
+constructor TdGQuery.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   CheckBrokerClass;
@@ -952,121 +952,121 @@ begin
     FBroker.Connection := FConnection.Broker.Connection;
 end;
 
-destructor TdQuery.Destroy;
+destructor TdGQuery.Destroy;
 begin
   FBroker.Free;
   inherited Destroy;
 end;
 
-procedure TdQuery.CheckBrokerClass;
+procedure TdGQuery.CheckBrokerClass;
 begin
   if not T1.InheritsFrom(TdQueryBroker) then
     raise EdQuery.CreateFmt('Invalid broker class: "%s".', [T1.ClassName]);
 end;
 
-procedure TdQuery.CheckBroker;
+procedure TdGQuery.CheckBroker;
 begin
   if FBroker = nil then
     raise EdQuery.Create('Broker not assigned.');
 end;
 
-procedure TdQuery.CheckConnection;
+procedure TdGQuery.CheckConnection;
 begin
   if FConnection = nil then
     raise EdQuery.Create('Connection not assigned.');
 end;
 
-function TdQuery.GetActive: Boolean;
+function TdGQuery.GetActive: Boolean;
 begin
   CheckBroker;
   Result := FBroker.Active;
 end;
 
-function TdQuery.GetBOF: Boolean;
+function TdGQuery.GetBOF: Boolean;
 begin
   CheckBroker;
   Result := FBroker.BOF;
 end;
 
-function TdQuery.GetDataSet: TDataSet;
+function TdGQuery.GetDataSet: TDataSet;
 begin
   CheckBroker;
   Result := FBroker.DataSet;
 end;
 
-function TdQuery.GetDataSource: TDataSource;
+function TdGQuery.GetDataSource: TDataSource;
 begin
   CheckBroker;
   Result := FBroker.DataSource;
 end;
 
-function TdQuery.GetEOF: Boolean;
+function TdGQuery.GetEOF: Boolean;
 begin
   CheckBroker;
   Result := FBroker.EOF;
 end;
 
-function TdQuery.GetFieldDefs: TFieldDefs;
+function TdGQuery.GetFieldDefs: TFieldDefs;
 begin
   CheckBroker;
   Result := FBroker.FieldDefs;
 end;
 
-function TdQuery.GetFields: TFields;
+function TdGQuery.GetFields: TFields;
 begin
   CheckBroker;
   Result := FBroker.Fields;
 end;
 
-function TdQuery.GetModified: Boolean;
+function TdGQuery.GetModified: Boolean;
 begin
   CheckBroker;
   Result := FBroker.Modified;
 end;
 
-function TdQuery.GetParams: TParams;
+function TdGQuery.GetParams: TParams;
 begin
   CheckBroker;
   Result := FBroker.Params;
 end;
 
-function TdQuery.GetPosition: Int64;
+function TdGQuery.GetPosition: Int64;
 begin
   CheckBroker;
   Result := FBroker.Position;
 end;
 
-function TdQuery.GetSQL: TStrings;
+function TdGQuery.GetSQL: TStrings;
 begin
   CheckBroker;
   Result := FBroker.SQL;
 end;
 
-function TdQuery.GetState: TDataSetState;
+function TdGQuery.GetState: TDataSetState;
 begin
   CheckBroker;
   Result := FBroker.State;
 end;
 
-procedure TdQuery.SetActive(const AValue: Boolean);
+procedure TdGQuery.SetActive(const AValue: Boolean);
 begin
   CheckBroker;
   FBroker.Active := AValue;
 end;
 
-procedure TdQuery.SetDataSource(AValue: TDataSource);
+procedure TdGQuery.SetDataSource(AValue: TDataSource);
 begin
   CheckBroker;
   FBroker.DataSource := AValue;
 end;
 
-procedure TdQuery.SetPosition(const AValue: Int64);
+procedure TdGQuery.SetPosition(const AValue: Int64);
 begin
   CheckBroker;
   FBroker.Position := AValue;
 end;
 
-procedure TdQuery.ApplyUpdates;
+procedure TdGQuery.ApplyUpdates;
 begin
   CheckBroker;
   CheckConnection;
@@ -1074,7 +1074,7 @@ begin
   FBroker.ApplyUpdates;
 end;
 
-procedure TdQuery.CancelUpdates;
+procedure TdGQuery.CancelUpdates;
 begin
   CheckBroker;
   CheckConnection;
@@ -1082,7 +1082,7 @@ begin
   FBroker.CancelUpdates;
 end;
 
-procedure TdQuery.Apply;
+procedure TdGQuery.Apply;
 begin
   CheckBroker;
   CheckConnection;
@@ -1090,7 +1090,7 @@ begin
   FBroker.Apply;
 end;
 
-procedure TdQuery.ApplyRetaining;
+procedure TdGQuery.ApplyRetaining;
 begin
   CheckBroker;
   CheckConnection;
@@ -1098,7 +1098,7 @@ begin
   FBroker.ApplyRetaining;
 end;
 
-procedure TdQuery.Undo;
+procedure TdGQuery.Undo;
 begin
   CheckBroker;
   CheckConnection;
@@ -1106,7 +1106,7 @@ begin
   FBroker.Undo;
 end;
 
-procedure TdQuery.UndoRetaining;
+procedure TdGQuery.UndoRetaining;
 begin
   CheckBroker;
   CheckConnection;
@@ -1114,37 +1114,37 @@ begin
   FBroker.UndoRetaining;
 end;
 
-procedure TdQuery.Append;
+procedure TdGQuery.Append;
 begin
   CheckBroker;
   FBroker.Append;
 end;
 
-procedure TdQuery.Insert;
+procedure TdGQuery.Insert;
 begin
   CheckBroker;
   FBroker.Insert;
 end;
 
-procedure TdQuery.Edit;
+procedure TdGQuery.Edit;
 begin
   CheckBroker;
   FBroker.Edit;
 end;
 
-procedure TdQuery.Cancel;
+procedure TdGQuery.Cancel;
 begin
   CheckBroker;
   FBroker.Cancel;
 end;
 
-procedure TdQuery.Delete;
+procedure TdGQuery.Delete;
 begin
   CheckBroker;
   FBroker.Delete;
 end;
 
-procedure TdQuery.Open;
+procedure TdGQuery.Open;
 begin
   CheckBroker;
   CheckConnection;
@@ -1152,49 +1152,49 @@ begin
   FBroker.Open;
 end;
 
-procedure TdQuery.Close;
+procedure TdGQuery.Close;
 begin
   CheckBroker;
   FBroker.Close;
 end;
 
-procedure TdQuery.Refresh;
+procedure TdGQuery.Refresh;
 begin
   CheckBroker;
   FBroker.Refresh;
 end;
 
-procedure TdQuery.First;
+procedure TdGQuery.First;
 begin
   CheckBroker;
   FBroker.First;
 end;
 
-procedure TdQuery.Prior;
+procedure TdGQuery.Prior;
 begin
   CheckBroker;
   FBroker.Prior;
 end;
 
-procedure TdQuery.Next;
+procedure TdGQuery.Next;
 begin
   CheckBroker;
   FBroker.Next;
 end;
 
-procedure TdQuery.Last;
+procedure TdGQuery.Last;
 begin
   CheckBroker;
   FBroker.Last;
 end;
 
-procedure TdQuery.Post;
+procedure TdGQuery.Post;
 begin
   CheckBroker;
   FBroker.Post;
 end;
 
-procedure TdQuery.Execute;
+procedure TdGQuery.Execute;
 var
   S: string;
 begin
@@ -1206,100 +1206,100 @@ begin
   FBroker.Execute;
 end;
 
-function TdQuery.RowsAffected: Int64;
+function TdGQuery.RowsAffected: Int64;
 begin
   CheckBroker;
   Result := FBroker.RowsAffected;
 end;
 
-function TdQuery.Locate(const AKeyFields: string; const AKeyValues: Variant;
+function TdGQuery.Locate(const AKeyFields: string; const AKeyValues: Variant;
   const AOptions: TLocateOptions): Boolean;
 begin
   CheckBroker;
   Result := FBroker.Locate(AKeyFields, AKeyValues, AOptions);
 end;
 
-function TdQuery.Param(const AName: string): TParam;
+function TdGQuery.Param(const AName: string): TParam;
 begin
   CheckBroker;
   Result := FBroker.Param(AName);
 end;
 
-function TdQuery.Field(const AName: string): TField;
+function TdGQuery.Field(const AName: string): TField;
 begin
   CheckBroker;
   Result := FBroker.Field(AName);
 end;
 
-function TdQuery.FieldDef(const AName: string): TFieldDef;
+function TdGQuery.FieldDef(const AName: string): TFieldDef;
 begin
   CheckBroker;
   Result := FBroker.FieldDef(AName);
 end;
 
-function TdQuery.Count: Int64;
+function TdGQuery.Count: Int64;
 begin
   CheckBroker;
   Result := FBroker.Count;
 end;
 
-function TdQuery.GetBookmark: TBookmark;
+function TdGQuery.GetBookmark: TBookmark;
 begin
   CheckBroker;
   Result := FBroker.Bookmark;
 end;
 
-procedure TdQuery.GotoBookmark(ABookmark: TBookmark);
+procedure TdGQuery.GotoBookmark(ABookmark: TBookmark);
 begin
   CheckBroker;
   FBroker.GotoBookmark(ABookmark);
 end;
 
-{ TdEntityQuery }
+{ TdGEntityQuery }
 
-constructor TdEntityQuery.Create(AOwner: TComponent);
+constructor TdGEntityQuery.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FEntity := CreateEntity;
 end;
 
-destructor TdEntityQuery.Destroy;
+destructor TdGEntityQuery.Destroy;
 begin
   FreeEntity;
   inherited Destroy;
 end;
 
-function TdEntityQuery.CreateEntity: T3;
+function TdGEntityQuery.CreateEntity: T3;
 begin
   Result := T3.Create;
 end;
 
-procedure TdEntityQuery.FreeEntity;
+procedure TdGEntityQuery.FreeEntity;
 begin
   FreeAndNil(FEntity);
 end;
 
-procedure TdEntityQuery.GetFields;
+procedure TdGEntityQuery.GetFields;
 begin
-  Connection.Logger.Log(ltCustom, 'Trying Query.GetFields');
+  Connection.Logger.Log(ltCustom, 'Trying EntityQuery.GetFields');
   dGetFields(FEntity, Fields);
 end;
 
-procedure TdEntityQuery.SetFields;
+procedure TdGEntityQuery.SetFields;
 begin
-  Connection.Logger.Log(ltCustom, 'Trying Query.SetFields');
+  Connection.Logger.Log(ltCustom, 'Trying EntityQuery.SetFields');
   dSetFields(FEntity, Fields);
 end;
 
-procedure TdEntityQuery.GetParams;
+procedure TdGEntityQuery.GetParams;
 begin
-  Connection.Logger.Log(ltCustom, 'Trying Query.GetParams');
+  Connection.Logger.Log(ltCustom, 'Trying EntityQuery.GetParams');
   dGetParams(FEntity, Params);
 end;
 
-procedure TdEntityQuery.SetParams;
+procedure TdGEntityQuery.SetParams;
 begin
-  Connection.Logger.Log(ltCustom, 'Trying Query.SetParams');
+  Connection.Logger.Log(ltCustom, 'Trying EntityQuery.SetParams');
   dSetParams(FEntity, Params);
 end;
 

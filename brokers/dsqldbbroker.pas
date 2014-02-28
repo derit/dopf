@@ -59,7 +59,7 @@ type
 
   { TdSQLdbConnector }
 
-  TdSQLdbConnector = class(specialize TdConnection<TdSQLdbConnectionBroker, TdLogger>)
+  TdSQLdbConnector = class(specialize TdGConnection<TdSQLdbConnectionBroker, TdLogger>)
   end;
 
   { TdSQLdbQueryBroker }
@@ -122,12 +122,12 @@ type
 
   { TdSQLdbQuery }
 
-  TdSQLdbQuery = class(specialize TdQuery<TdSQLdbQueryBroker, TdSQLdbConnector>)
+  TdSQLdbQuery = class(specialize TdGQuery<TdSQLdbQueryBroker, TdSQLdbConnector>)
   end;
 
-  { TdSQLdbEntityQuery }
+  { TdGSQLdbEntityQuery }
 
-  generic TdSQLdbEntityQuery<T1, T2> = class(specialize TdEntityQuery<TdSQLdbQueryBroker, T1, T2>)
+  generic TdGSQLdbEntityQuery<T1, T2> = class(specialize TdGEntityQuery<TdSQLdbQueryBroker, T1, T2>)
   end;
 
 implementation

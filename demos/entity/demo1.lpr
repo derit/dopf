@@ -9,7 +9,7 @@ type
   Tcon = class(TdSQLdbConnector)
   end;
 
-  Tqry = class(specialize TdSQLdbEntityQuery<Tcon, TPerson>)
+  Tqry = class(specialize TdGSQLdbEntityQuery<Tcon, TPerson>)
   end;
 
 var
