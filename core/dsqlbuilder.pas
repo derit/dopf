@@ -18,7 +18,7 @@ unit dSqlBuilder;
 interface
 
 uses
-  dClasses, Classes, SysUtils, TypInfo;
+  dClasses, dUtils, Classes, SysUtils, TypInfo;
 
 type
   EdTable = class(EdException);
@@ -66,8 +66,8 @@ type
 
   generic TdGSelectBuilder<T> = class(specialize TdGSqlBuilder<T>)
   public
-    procedure MakeFields(out AFields: string;
-      const AIgnoreWildcard: Boolean); virtual;
+    class function MakeFields({%H-}ATable: T; out AFields: string;
+      const AIgnoreWildcard: Boolean): Boolean; virtual;
     procedure Build(out ASql: string;
       const AIgnoreWildcard: Boolean = True); override;
   end;
@@ -76,8 +76,8 @@ type
 
   generic TdGInsertBuilder<T> = class(specialize TdGSqlBuilder<T>)
   public
-    procedure MakeFields(out AFields, AParams: string;
-      const AIgnorePrimaryKeys: Boolean); virtual;
+    class function MakeFields({%H-}ATable: T; out AFields, AParams: string;
+      const AIgnorePrimaryKeys: Boolean): Boolean; virtual;
     procedure Build(out ASql: string;
       const AIgnorePrimaryKeys: Boolean = True); override;
   end;
@@ -86,8 +86,8 @@ type
 
   generic TdGUpdateBuilder<T> = class(specialize TdGSqlBuilder<T>)
   public
-    procedure MakeFields(out AFields, AParams: string;
-      const AIgnorePrimaryKeys: Boolean); virtual;
+    class function MakeFields({%H-}ATable: T; out AFields, AParams: string;
+      const AIgnorePrimaryKeys: Boolean): Boolean; virtual;
     procedure Build(out ASql: string;
       const AIgnorePrimaryKeys: Boolean = True); override;
   end;
@@ -96,8 +96,8 @@ type
 
   generic TdGDeleteBuilder<T> = class(specialize TdGSqlBuilder<T>)
   public
-    procedure MakeParams(out AParams: string;
-      const AIgnoreProperties: Boolean); virtual;
+    class function MakeParams({%H-}ATable: T; out AParams: string;
+      const AIgnoreProperties: Boolean): Boolean; virtual;
     procedure Build(out ASql: string;
       const AIgnoreProperties: Boolean = True); override;
   end;
@@ -150,22 +150,24 @@ end;
 
 { TdGSelectBuilder }
 
-procedure TdGSelectBuilder.MakeFields(out AFields: string;
-  const AIgnoreWildcard: Boolean);
+class function TdGSelectBuilder.MakeFields(ATable: T; out AFields: string;
+  const AIgnoreWildcard: Boolean): Boolean;
 var
   N: string;
   I: Integer;
 begin
   if not AIgnoreWildcard then
   begin
+    Result := True;
     AFields := '*';
     Exit;
   end;
-  if (FTable = nil) or (not Assigned(FTable.PropList)) then
+  Result := (ATable <> nil) and Assigned(ATable.PropList);
+  if not Result then
     Exit;
-  for I := 0 to Pred(FTable.PropCount) do
+  for I := 0 to Pred(ATable.PropCount) do
   begin
-    N := FTable.PropList^[I]^.Name;
+    N := ATable.PropList^[I]^.Name;
     N += ', ';
     AFields += N;
   end;
@@ -178,26 +180,27 @@ procedure TdGSelectBuilder.Build(out ASql: string;
 var
   FS: string;
 begin
-  MakeFields(FS, AIgnoreWildcard);
-  ASql := 'select ' + FS + ' from ' + FTable.Name;
+  if MakeFields(FTable, FS, AIgnoreWildcard) then
+    ASql := 'select ' + FS + ' from ' + FTable.Name;
 end;
 
 { TdGInsertBuilder }
 
-procedure TdGInsertBuilder.MakeFields(out AFields, AParams: string;
-  const AIgnorePrimaryKeys: Boolean);
+class function TdGInsertBuilder.MakeFields(ATable: T; out AFields,
+  AParams: string; const AIgnorePrimaryKeys: Boolean): Boolean;
 var
   N: string;
   I: Integer;
 begin
   AFields := '';
   AParams := '';
-  if (FTable = nil) or (not Assigned(FTable.PropList)) then
+  Result := (ATable <> nil) and Assigned(ATable.PropList);
+  if not Result then
     Exit;
-  for I := 0 to Pred(FTable.PropCount) do
+  for I := 0 to Pred(ATable.PropCount) do
   begin
-    N := FTable.PropList^[I]^.Name;
-    if AIgnorePrimaryKeys and (FTable.PrimaryKeys.IndexOf(N) > -1) then
+    N := ATable.PropList^[I]^.Name;
+    if AIgnorePrimaryKeys and (ATable.PrimaryKeys.IndexOf(N) > -1) then
       Continue;
     N += ', ';
     AFields += N;
@@ -214,29 +217,31 @@ procedure TdGInsertBuilder.Build(out ASql: string;
 var
   FS, PS: string;
 begin
-  MakeFields(FS, PS, AIgnorePrimaryKeys);
-  ASql := 'insert into ' + FTable.Name + ' (' + FS + ') ' + 'values (' + PS + ')';
+  if MakeFields(FTable, FS, PS, AIgnorePrimaryKeys) then
+    ASql := 'insert into ' + FTable.Name + ' (' + FS + ') ' +
+      'values (' + PS + ')';
 end;
 
 { TdGUpdateBuilder }
 
-procedure TdGUpdateBuilder.MakeFields(out AFields, AParams: string;
-  const AIgnorePrimaryKeys: Boolean);
+class function TdGUpdateBuilder.MakeFields(ATable: T; out AFields,
+  AParams: string; const AIgnorePrimaryKeys: Boolean): Boolean;
 var
   N, P: string;
   I, X: Integer;
 begin
   AFields := '';
   AParams := '';
-  if (FTable = nil) or (not Assigned(FTable.PropList)) then
+  Result := (ATable <> nil) and Assigned(ATable.PropList);
+  if not Result then
     Exit;
-  for I := 0 to Pred(FTable.PropCount) do
+  for I := 0 to Pred(ATable.PropCount) do
   begin
-    N := FTable.PropList^[I]^.Name;
-    X := FTable.PrimaryKeys.IndexOf(N);
+    N := ATable.PropList^[I]^.Name;
+    X := ATable.PrimaryKeys.IndexOf(N);
     if X > -1 then
     begin
-      P := FTable.PrimaryKeys[X];
+      P := ATable.PrimaryKeys[X];
       AParams += P + ' = :' + P + ' and ';
       if AIgnorePrimaryKeys then
         Continue;
@@ -254,28 +259,29 @@ procedure TdGUpdateBuilder.Build(out ASql: string;
 var
   FS, PS: string;
 begin
-  MakeFields(FS, PS, AIgnorePrimaryKeys);
-  ASQL := 'update ' + FTable.Name + ' set ' + FS + ' where ' + PS;
+  if MakeFields(FTable, FS, PS, AIgnorePrimaryKeys) then
+    ASQL := 'update ' + FTable.Name + ' set ' + FS + ' where ' + PS;
 end;
 
 { TdGDeleteBuilder }
 
-procedure TdGDeleteBuilder.MakeParams(out AParams: string;
-  const AIgnoreProperties: Boolean);
+class function TdGDeleteBuilder.MakeParams(ATable: T; out AParams: string;
+  const AIgnoreProperties: Boolean): Boolean;
 var
   N, P: string;
   I, X: Integer;
 begin
   AParams := '';
-  if (FTable = nil) or (not Assigned(FTable.PropList)) then
+  Result := (ATable <> nil) or Assigned(ATable.PropList);
+  if not Result then
     Exit;
-  for I := 0 to Pred(FTable.PropCount) do
+  for I := 0 to Pred(ATable.PropCount) do
   begin
-    N := FTable.PropList^[I]^.Name;
-    X := FTable.PrimaryKeys.IndexOf(N);
+    N := ATable.PropList^[I]^.Name;
+    X := ATable.PrimaryKeys.IndexOf(N);
     if X > -1 then
     begin
-      P := FTable.PrimaryKeys[X];
+      P := ATable.PrimaryKeys[X];
       AParams += P + ' = :' + P + ' and ';
     end
     else
@@ -291,8 +297,8 @@ procedure TdGDeleteBuilder.Build(out ASql: string;
 var
   PS: string;
 begin
-  MakeParams(PS, AIgnoreProperties);
-  ASQL := 'delete from ' + FTable.Name + ' where ' + PS;
+  if MakeParams(FTable, PS, AIgnoreProperties) then
+    ASQL := 'delete from ' + FTable.Name + ' where ' + PS;
 end;
 
 end.
