@@ -67,9 +67,9 @@ type
   generic TdGSelectBuilder<T> = class(specialize TdGSqlBuilder<T>)
   public
     procedure MakeFields(out AFields: string;
-      const AUseWildcard: Boolean); virtual;
+      const AIgnoreWildcard: Boolean); virtual;
     procedure Build(out ASql: string;
-      const AUseWildcard: Boolean = True); override;
+      const AIgnoreWildcard: Boolean = True); override;
   end;
 
   { TdGInsertBuilder }
@@ -151,12 +151,12 @@ end;
 { TdGSelectBuilder }
 
 procedure TdGSelectBuilder.MakeFields(out AFields: string;
-  const AUseWildcard: Boolean);
+  const AIgnoreWildcard: Boolean);
 var
   N: string;
   I: Integer;
 begin
-  if AUseWildcard then
+  if not AIgnoreWildcard then
   begin
     AFields := '*';
     Exit;
@@ -173,11 +173,12 @@ begin
   StrLower(PChar(AFields));
 end;
 
-procedure TdGSelectBuilder.Build(out ASql: string; const AUseWildcard: Boolean);
+procedure TdGSelectBuilder.Build(out ASql: string;
+  const AIgnoreWildcard: Boolean);
 var
   FS: string;
 begin
-  MakeFields(FS, AUseWildcard);
+  MakeFields(FS, AIgnoreWildcard);
   ASql := 'select ' + FS + ' from ' + FTable.Name;
 end;
 
