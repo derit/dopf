@@ -18,7 +18,7 @@ unit dStorage;
 interface
 
 uses
-  dClasses, dUtils, dSqlBuilder, FGL;
+  dClasses, dUtils, dSqlBuilder, SysUtils, TypInfo, FGL;
 
 type
   EdStorage = class(EdException);
@@ -51,6 +51,9 @@ type
   public
     constructor Create(AConnection: T1;
       const ATableName: string); reintroduce; virtual;
+    procedure Conditions({%H-}AEntity: T3; out AParams: string); overload;
+    procedure Conditions({%H-}AEntity: T3; out AParams: string;
+      const AIgnoredParams: array of string); overload;
     function Get(AEntity: T3): Boolean;
     function Find(AEntity: T3; const ACondition: string): Boolean; overload;
     function Find(AEntity: T3; AEntities: TEntities;
@@ -146,6 +149,61 @@ end;
 procedure TdGStorage.GetFields(AEntity: T3);
 begin
   dUtils.dGetFields(AEntity, FQuery.Fields);
+end;
+
+procedure TdGStorage.Conditions(AEntity: T3; out AParams: string);
+var
+  C, I: Integer;
+  N: ShortString;
+  PL: PPropList = nil;
+begin
+  C := GetPropList(PTypeInfo(AEntity.ClassInfo), PL);
+  AParams := '';
+  if Assigned(PL) then
+    try
+      for I := 0 to Pred(C) do
+      begin
+        N := PL^[I]^.Name;
+        AParams += N + ' = :' + N + ' and ';
+      end;
+      SetLength(AParams, Length(AParams) - 5);
+      StrLower(PChar(AParams));
+    finally
+      FreeMem(PL);
+    end;
+end;
+
+procedure TdGStorage.Conditions(AEntity: T3; out AParams: string;
+  const AIgnoredParams: array of string);
+var
+  B: Boolean;
+  N: ShortString;
+  C, I, J: Integer;
+  PL: PPropList = nil;
+begin
+  C := GetPropList(PTypeInfo(AEntity.ClassInfo), PL);
+  AParams := '';
+  if Assigned(PL) then
+    try
+      for I := 0 to Pred(C) do
+      begin
+        N := PL^[I]^.Name;
+        B := False;
+        for J := Low(AIgnoredParams) to High(AIgnoredParams) do
+          if ShortCompareText(N, AIgnoredParams[J]) = 0 then
+          begin
+            B := True;
+            Break;
+          end;
+        if B then
+          Continue;
+        AParams += N + ' = :' + N + ' and ';
+      end;
+      SetLength(AParams, Length(AParams) - 5);
+      StrLower(PChar(AParams));
+    finally
+      FreeMem(PL);
+    end;
 end;
 
 function TdGStorage.Get(AEntity: T3): Boolean;
