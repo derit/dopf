@@ -51,8 +51,9 @@ type
     constructor Create(AConnection: T1;
       const ATableName: string); reintroduce; virtual;
     destructor Destroy; override;
-    procedure Conditions(out AParams: string;
-      {%H-}const AIgnoreProperties: Boolean = True); overload;
+    procedure GetFieldNames(out AFieldNames: string); virtual;
+    procedure GetConditions(out APairs: string;
+      {%H-}const AIgnoreProperties: Boolean = True); virtual;
     function Get(AEntity: T3): Boolean;
     function Find(AEntity: T3; const ACondition: string): Boolean; overload;
     function Find(AEntity: T3; AEntities: TEntities;
@@ -92,10 +93,15 @@ begin
   inherited Destroy;
 end;
 
-procedure TdGStorage.Conditions(out AParams: string;
+procedure TdGStorage.GetFieldNames(out AFieldNames: string);
+begin
+  TSelectBuilder.MakeFields(FTable, AFieldNames, True);
+end;
+
+procedure TdGStorage.GetConditions(out APairs: string;
   const AIgnoreProperties: Boolean);
 begin
-  TDeleteBuilder.MakeParams(FTable, AParams, AIgnoreProperties);
+  TDeleteBuilder.MakeParams(FTable, APairs, AIgnoreProperties);
 end;
 
 procedure TdGStorage.CheckEntity(AEntity: T3);
