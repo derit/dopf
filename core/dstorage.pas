@@ -41,8 +41,7 @@ type
   protected
     procedure CheckEntity({%H-}AEntity: T3);
     procedure CheckEntities({%H-}AEntities: TEntities);
-    function InternalFind({%H-}ATable: TTable; {%H-}AEntity: T3;
-      const ACondition: string): Boolean;
+    function InternalFind({%H-}AEntity: T3; const ACondition: string): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
     procedure SetSql(const ASql: string); virtual;
     procedure SetParams({%H-}AEntity: T3); virtual;
@@ -52,9 +51,8 @@ type
     constructor Create(AConnection: T1;
       const ATableName: string); reintroduce; virtual;
     destructor Destroy; override;
-    procedure Conditions({%H-}AEntity: T3; out AParams: string); overload;
-    procedure Conditions({%H-}AEntity: T3; out AParams: string;
-      const AIgnoredParams: array of string); overload;
+    procedure Conditions(out AParams: string;
+      {%H-}const AIgnoreProperties: Boolean = True); overload;
     function Get(AEntity: T3): Boolean;
     function Find(AEntity: T3; const ACondition: string): Boolean; overload;
     function Find(AEntity: T3; AEntities: TEntities;
@@ -94,6 +92,12 @@ begin
   inherited Destroy;
 end;
 
+procedure TdGStorage.Conditions(out AParams: string;
+  const AIgnoreProperties: Boolean);
+begin
+  TDeleteBuilder.MakeParams(FTable, AParams, AIgnoreProperties);
+end;
+
 procedure TdGStorage.CheckEntity(AEntity: T3);
 begin
   if AEntity = nil then
@@ -114,12 +118,11 @@ begin
   FQuery.Execute;
 end;
 
-function TdGStorage.InternalFind(ATable: TTable; AEntity: T3;
-  const ACondition: string): Boolean;
+function TdGStorage.InternalFind(AEntity: T3; const ACondition: string): Boolean;
 var
   FS: string = '';
 begin
-  TSelectBuilder.MakeFields(ATable, FS, True);
+  TSelectBuilder.MakeFields(FTable, FS, True);
   SetSql('select ' + FS + ' from ' + FTable.Name);
   if ACondition <> '' then
     FQuery.SQL.Add('where ' + ACondition);
@@ -160,74 +163,19 @@ begin
   dUtils.dGetFields(AEntity, FQuery.Fields);
 end;
 
-procedure TdGStorage.Conditions(AEntity: T3; out AParams: string);
-var
-  C, I: Integer;
-  N: ShortString;
-  PL: PPropList = nil;
-begin
-  C := GetPropList(PTypeInfo(AEntity.ClassInfo), PL);
-  AParams := '';
-  if Assigned(PL) then
-    try
-      for I := 0 to Pred(C) do
-      begin
-        N := PL^[I]^.Name;
-        AParams += N + ' = :' + N + ' and ';
-      end;
-      SetLength(AParams, Length(AParams) - 5);
-      StrLower(PChar(AParams));
-    finally
-      FreeMem(PL);
-    end;
-end;
-
-procedure TdGStorage.Conditions(AEntity: T3; out AParams: string;
-  const AIgnoredParams: array of string);
-var
-  B: Boolean;
-  N: ShortString;
-  C, I, J: Integer;
-  PL: PPropList = nil;
-begin
-  C := GetPropList(PTypeInfo(AEntity.ClassInfo), PL);
-  AParams := '';
-  if Assigned(PL) then
-    try
-      for I := 0 to Pred(C) do
-      begin
-        N := PL^[I]^.Name;
-        B := False;
-        for J := Low(AIgnoredParams) to High(AIgnoredParams) do
-          if ShortCompareText(N, AIgnoredParams[J]) = 0 then
-          begin
-            B := True;
-            Break;
-          end;
-        if B then
-          Continue;
-        AParams += N + ' = :' + N + ' and ';
-      end;
-      SetLength(AParams, Length(AParams) - 5);
-      StrLower(PChar(AParams));
-    finally
-      FreeMem(PL);
-    end;
-end;
-
 function TdGStorage.Get(AEntity: T3): Boolean;
 var
   PS: string = '';
 begin
   CheckEntity(AEntity);
   TDeleteBuilder.MakeParams(FTable, PS, True);
-  Result := InternalFind(FTable, AEntity, PS);
+  Result := InternalFind(AEntity, PS);
 end;
 
 function TdGStorage.Find(AEntity: T3; const ACondition: string): Boolean;
 begin
   CheckEntity(AEntity);
-  Result := InternalFind(FTable, AEntity, ACondition);
+  Result := InternalFind(AEntity, ACondition);
 end;
 
 function TdGStorage.Find(AEntity: T3; AEntities: TEntities;
@@ -235,7 +183,7 @@ function TdGStorage.Find(AEntity: T3; AEntities: TEntities;
 begin
   CheckEntity(AEntity);
   CheckEntities(AEntities);
-  Result := InternalFind(FTable, AEntity, ACondition);
+  Result := InternalFind(AEntity, ACondition);
   if Result then
     PopulateEntities(AEntities);
 end;
