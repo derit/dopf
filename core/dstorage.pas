@@ -71,6 +71,7 @@ type
     procedure Apply; virtual;
     procedure Discard; virtual;
     property Connection: T1 read FConnection;
+    property TableName: string read FTableName write FTableName;
   end;
 
 implementation
