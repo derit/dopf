@@ -32,12 +32,11 @@ type
     FPropList: PPropList;
     FName: string;
     procedure SetName(const AValue: string);
-  protected
-    property PropCount: Integer read FPropCount;
-    property PropList: PPropList read FPropList;
   public
     constructor Create; virtual;
     destructor Destroy; override;
+    property PropCount: Integer read FPropCount;
+    property PropList: PPropList read FPropList;
   published
     property Name: string read FName write SetName;
     property PrimaryKeys: TStrings read FPrimaryKeys;
