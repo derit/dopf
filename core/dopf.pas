@@ -11,7 +11,7 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *)
 
-unit dOPF;
+unit dOpf;
 
 {$i dopf.inc}
 
@@ -27,7 +27,7 @@ type
 
   EdQuery = class(EdException);
 
-  EdOPF = class(EdException);
+  EdOpf = class(EdException);
 
   TdLogType = (ltTransaction, ltSQL, ltCustom);
 
@@ -308,9 +308,9 @@ type
     property Entity: T3 read FEntity write FEntity;
   end;
 
-  { TdGOPF }
+  { TdGOpf }
 
-  generic TdGOPF<T1, T2, T3> = class(TdComponent)
+  generic TdGOpf<T1, T2, T3> = class(TdComponent)
   private type
     TTable = specialize TdGTable<T3>;
     TSelectBuilder = specialize TdGSelectBuilder<TTable>;
@@ -1360,9 +1360,9 @@ begin
   dSetParams(FEntity, Params);
 end;
 
-{ TdGOPF }
+{ TdGOpf }
 
-constructor TdGOPF.Create(AConnection: T1; const ATableName: string);
+constructor TdGOpf.Create(AConnection: T1; const ATableName: string);
 begin
   inherited Create(AConnection);
   FConnection := AConnection;
@@ -1371,44 +1371,44 @@ begin
   FTable.Name := ATableName;
 end;
 
-destructor TdGOPF.Destroy;
+destructor TdGOpf.Destroy;
 begin
   FTable.Free;
   inherited Destroy;
 end;
 
-procedure TdGOPF.GetFieldNames(out AFieldNames: string);
+procedure TdGOpf.GetFieldNames(out AFieldNames: string);
 begin
   TSelectBuilder.MakeFields(FTable, AFieldNames, True);
 end;
 
-procedure TdGOPF.GetConditions(out APairs: string;
+procedure TdGOpf.GetConditions(out APairs: string;
   const AIgnoreProperties: Boolean);
 begin
   TDeleteBuilder.MakeParams(FTable, APairs, AIgnoreProperties);
 end;
 
-procedure TdGOPF.CheckEntity(AEntity: T3);
+procedure TdGOpf.CheckEntity(AEntity: T3);
 begin
   if AEntity = nil then
-    raise EdOPF.Create('Entity must not be nil.');
+    raise EdOpf.Create('Entity must not be nil.');
   if T3 = TObject then
-    raise EdOPF.Create('Entity must be TObject directly.');
+    raise EdOpf.Create('Entity must be TObject directly.');
 end;
 
-procedure TdGOPF.CheckEntities(AEntities: TEntities);
+procedure TdGOpf.CheckEntities(AEntities: TEntities);
 begin
   if AEntities = nil then
-    raise EdOPF.Create('Entities must not be nil.');
+    raise EdOpf.Create('Entities must not be nil.');
 end;
 
-procedure TdGOPF.Empty;
+procedure TdGOpf.Empty;
 begin
   SetSql('delete from ' + FTable.Name);
   FQuery.Execute;
 end;
 
-function TdGOPF.InternalFind(AEntity: T3; const ACondition: string): Boolean;
+function TdGOpf.InternalFind(AEntity: T3; const ACondition: string): Boolean;
 var
   FS: string = '';
 begin
@@ -1423,7 +1423,7 @@ begin
     GetFields(AEntity);
 end;
 
-procedure TdGOPF.PopulateEntities(AEntities: TEntities);
+procedure TdGOpf.PopulateEntities(AEntities: TEntities);
 var
   E: T3;
 begin
@@ -1437,23 +1437,23 @@ begin
   end;
 end;
 
-procedure TdGOPF.SetSql(const ASql: string);
+procedure TdGOpf.SetSql(const ASql: string);
 begin
   FQuery.Close;
   FQuery.SQL.Text := ASql;
 end;
 
-procedure TdGOPF.SetParams(AEntity: T3);
+procedure TdGOpf.SetParams(AEntity: T3);
 begin
   dUtils.dSetParams(AEntity, FQuery.Params);
 end;
 
-procedure TdGOPF.GetFields(AEntity: T3);
+procedure TdGOpf.GetFields(AEntity: T3);
 begin
   dUtils.dGetFields(AEntity, FQuery.Fields);
 end;
 
-function TdGOPF.Get(AEntity: T3): Boolean;
+function TdGOpf.Get(AEntity: T3): Boolean;
 var
   PS: string = '';
 begin
@@ -1462,13 +1462,13 @@ begin
   Result := InternalFind(AEntity, PS);
 end;
 
-function TdGOPF.Find(AEntity: T3; const ACondition: string): Boolean;
+function TdGOpf.Find(AEntity: T3; const ACondition: string): Boolean;
 begin
   CheckEntity(AEntity);
   Result := InternalFind(AEntity, ACondition);
 end;
 
-function TdGOPF.Find(AEntity: T3; AEntities: TEntities;
+function TdGOpf.Find(AEntity: T3; AEntities: TEntities;
   const ACondition: string): Boolean;
 begin
   CheckEntity(AEntity);
@@ -1478,7 +1478,7 @@ begin
     PopulateEntities(AEntities);
 end;
 
-function TdGOPF.List(AEntity: T3; AEntities: TEntities;
+function TdGOpf.List(AEntity: T3; AEntities: TEntities;
   const ASql: string): Boolean;
 var
   FS: string = '';
@@ -1501,7 +1501,7 @@ begin
     PopulateEntities(AEntities);
 end;
 
-function TdGOPF.List(AEntities: TEntities; const ASql: string): Boolean;
+function TdGOpf.List(AEntities: TEntities; const ASql: string): Boolean;
 var
   FS: string = '';
 begin
@@ -1520,7 +1520,7 @@ begin
 end;
 
 {$NOTES OFF}
-procedure TdGOPF.Add(AEntity: T3; const AIgnorePrimaryKeys: Boolean);
+procedure TdGOpf.Add(AEntity: T3; const AIgnorePrimaryKeys: Boolean);
 var
   S: string = '';
   B: TInsertBuilder;
@@ -1540,7 +1540,7 @@ end;
 {$NOTES ON}
 
 {$NOTES OFF}
-procedure TdGOPF.Modify(AEntity: T3; const AIgnorePrimaryKeys: Boolean);
+procedure TdGOpf.Modify(AEntity: T3; const AIgnorePrimaryKeys: Boolean);
 var
   S: string = '';
   B: TUpdateBuilder;
@@ -1560,7 +1560,7 @@ end;
 {$NOTES ON}
 
 {$NOTES OFF}
-procedure TdGOPF.Remove(AEntity: T3; const AIgnoreProperties: Boolean);
+procedure TdGOpf.Remove(AEntity: T3; const AIgnoreProperties: Boolean);
 var
   S: string = '';
   B: TDeleteBuilder;
@@ -1579,12 +1579,12 @@ begin
 end;
 {$NOTES ON}
 
-procedure TdGOPF.Apply;
+procedure TdGOpf.Apply;
 begin
   FQuery.Apply;
 end;
 
-procedure TdGOPF.Discard;
+procedure TdGOpf.Discard;
 begin
   FQuery.Undo;
 end;

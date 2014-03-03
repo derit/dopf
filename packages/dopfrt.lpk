@@ -2,7 +2,7 @@
 <CONFIG>
   <Package Version="4">
     <PathDelim Value="\"/>
-    <Name Value="dOPFRT"/>
+    <Name Value="dOpfRT"/>
     <Author Value="Silvio Clécio - https://github.com/silvioprog"/>
     <CompilerOptions>
       <Version Value="11"/>
@@ -33,7 +33,7 @@
       </Item2>
       <Item3>
         <Filename Value="..\core\dopf.pas"/>
-        <UnitName Value="dOPF"/>
+        <UnitName Value="dOpf"/>
       </Item3>
       <Item4>
         <Filename Value="..\core\dopf.inc"/>

@@ -3,10 +3,10 @@ program demo1;
 {$mode objfpc}{$H+}
 
 uses
-  dOPF, dSQLdbBroker, dbutils, person, sysutils;
+  dOpf, dSQLdbBroker, dbutils, person, sysutils;
 
 type
-  Topf = specialize TdGOPF<TdSQLdbConnector, TdSQLdbQuery, TPerson>;
+  Topf = specialize TdGOpf<TdSQLdbConnector, TdSQLdbQuery, TPerson>;
 
 var
   i, per: TPerson;

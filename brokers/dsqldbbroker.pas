@@ -18,7 +18,7 @@ unit dSQLdbBroker;
 interface
 
 uses
-  dOPF, Classes, SysUtils, SQLdb, DB;
+  dOpf, Classes, SysUtils, SQLdb, DB;
 
 type
 
