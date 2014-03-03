@@ -1340,25 +1340,25 @@ end;
 procedure TdGEntityQuery.GetFields;
 begin
   Connection.Logger.Log(ltCustom, 'Trying EntityQuery.GetFields');
-  dGetFields(FEntity, Fields);
+  dUtils.dGetFields(FEntity, Fields);
 end;
 
 procedure TdGEntityQuery.SetFields;
 begin
   Connection.Logger.Log(ltCustom, 'Trying EntityQuery.SetFields');
-  dSetFields(FEntity, Fields);
+  dUtils.dSetFields(FEntity, Fields);
 end;
 
 procedure TdGEntityQuery.GetParams;
 begin
   Connection.Logger.Log(ltCustom, 'Trying EntityQuery.GetParams');
-  dGetParams(FEntity, Params);
+  dUtils.dGetParams(FEntity, Params);
 end;
 
 procedure TdGEntityQuery.SetParams;
 begin
   Connection.Logger.Log(ltCustom, 'Trying EntityQuery.SetParams');
-  dSetParams(FEntity, Params);
+  dUtils.dSetParams(FEntity, Params);
 end;
 
 { TdGOpf }
@@ -1446,7 +1446,7 @@ end;
 
 procedure TdGOpf.SetParams(AEntity: TObject);
 begin
-  dUtils.dSetParams(AEntity, FQuery.Params);
+  dUtils.dSetParams(FTable.PropList, FTable.PropCount, AEntity, FQuery.Params);
 end;
 
 procedure TdGOpf.GetFields(AEntity: TObject);
