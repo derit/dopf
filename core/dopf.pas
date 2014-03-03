@@ -33,7 +33,7 @@ type
 
   TdLogFilter = set of TdLogType;
 
-  TdLogEvent = procedure(const AType: TdLogType; const AMsg: string) of object;
+  TdLoggingEvent = procedure(const AType: TdLogType; const AMsg: string) of object;
 
   { TdLogger }
 
@@ -42,7 +42,7 @@ type
     FActive: Boolean;
     FFileName: TFileName;
     FFilter: TdLogFilter;
-    FOnLog: TdLogEvent;
+    FOnLogging: TdLoggingEvent;
     FStream: TFileStream;
     procedure SetActive(AValue: Boolean);
     procedure SetFileName(AValue: TFileName);
@@ -55,7 +55,7 @@ type
     property Active: Boolean read FActive write SetActive;
     property Filter: TdLogFilter read FFilter write FFilter;
     property FileName: TFileName read FFileName write SetFileName;
-    property OnLog: TdLogEvent read FOnLog write FOnLog;
+    property OnLogging: TdLoggingEvent read FOnLogging write FOnLogging;
   end;
 
   { TdConnectionBroker }
@@ -427,8 +427,8 @@ begin
       FStream.Write(AMsg[1], Length(AMsg));
       FStream.Write(LineEnding[1], Length(LineEnding));
     end;
-    if Assigned(FOnLog) then
-      FOnLog(AType, AMsg);
+    if Assigned(FOnLogging) then
+      FOnLogging(AType, AMsg);
   end;
 end;
 
