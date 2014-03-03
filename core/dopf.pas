@@ -1515,7 +1515,7 @@ begin
   else
     SetSql(ASql);
   if Assigned(AParams) then
-    SetParams(AParams);
+    dUtils.dSetParams(AParams, FQuery.Params);
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
