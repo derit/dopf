@@ -329,8 +329,8 @@ type
     function InternalFind({%H-}AEntity: T3; const ACondition: string): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
     procedure SetSql(const ASql: string); virtual;
-    procedure SetParams({%H-}AEntity: T3); virtual;
-    procedure GetFields({%H-}AEntity: T3); virtual;
+    procedure SetParams({%H-}AEntity: TObject); virtual;
+    procedure GetFields({%H-}AEntity: TObject); virtual;
     property Query: T2 read FQuery;
   public
     constructor Create(AConnection: T1;
@@ -345,7 +345,8 @@ type
       const ACondition: string): Boolean; overload;
     function List(AEntity: T3; AEntities: TEntities;
       const ASql: string = ''): Boolean;
-    function List(AEntities: TEntities; const ASql: string = ''): Boolean;
+    function List(AEntities: TEntities; const ASql: string = '';
+      AParams: TObject = nil): Boolean;
     procedure Add(AEntity: T3;
       {%H-}const AIgnorePrimaryKeys: Boolean = True); virtual;
     procedure Modify(AEntity: T3;
@@ -1443,12 +1444,12 @@ begin
   FQuery.SQL.Text := ASql;
 end;
 
-procedure TdGOpf.SetParams(AEntity: T3);
+procedure TdGOpf.SetParams(AEntity: TObject);
 begin
   dUtils.dSetParams(AEntity, FQuery.Params);
 end;
 
-procedure TdGOpf.GetFields(AEntity: T3);
+procedure TdGOpf.GetFields(AEntity: TObject);
 begin
   dUtils.dGetFields(AEntity, FQuery.Fields);
 end;
@@ -1501,7 +1502,7 @@ begin
     PopulateEntities(AEntities);
 end;
 
-function TdGOpf.List(AEntities: TEntities; const ASql: string): Boolean;
+function TdGOpf.List(AEntities: TEntities; const ASql: string; AParams: TObject): Boolean;
 var
   FS: string = '';
 begin
@@ -1513,6 +1514,8 @@ begin
   end
   else
     SetSql(ASql);
+  if Assigned(AParams) then
+    SetParams(AParams);
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
