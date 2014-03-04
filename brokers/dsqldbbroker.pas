@@ -130,6 +130,11 @@ type
   generic TdGSQLdbEntityQuery<T1, T2> = class(specialize TdGEntityQuery<TdSQLdbQueryBroker, T1, T2>)
   end;
 
+  { TdGSQLdbOpf }
+
+  generic TdGSQLdbOpf<T> = class(specialize TdGOpf<TdSQLdbConnector, TdSQLdbQuery, T>)
+  end;
+
 implementation
 
 { TdSQLdbConnectionBroker }
