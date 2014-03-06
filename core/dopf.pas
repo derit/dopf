@@ -328,10 +328,6 @@ type
     procedure CheckEntities({%H-}AEntities: TEntities);
     function InternalFind({%H-}AEntity: T3; const ACondition: string): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
-    procedure SetSql(const ASql: string); virtual;
-    procedure SetParams({%H-}AEntity: TObject); virtual;
-    procedure GetFields({%H-}AEntity: TObject); virtual;
-    property Query: T2 read FQuery;
   public
     constructor Create(AConnection: T1;
       const ATableName: string); reintroduce; virtual;
@@ -339,6 +335,9 @@ type
     procedure GetFieldNames(out AFieldNames: string); virtual;
     procedure GetConditions(out APairs: string;
       {%H-}const AIgnoreProperties: Boolean = True); virtual;
+    procedure SetSql(const ASql: string); virtual;
+    procedure SetParams({%H-}AEntity: TObject); virtual;
+    procedure GetFields({%H-}AEntity: TObject); virtual;
     function Get(AEntity: T3): Boolean;
     function Find(AEntity: T3; const ACondition: string): Boolean; overload;
     function Find(AEntity: T3; AEntities: TEntities;
@@ -357,6 +356,7 @@ type
     procedure Apply; virtual;
     procedure Discard; virtual;
     property Connection: T1 read FConnection;
+    property Query: T2 read FQuery;
     property Table: TTable read FTable write FTable;
   end;
 
