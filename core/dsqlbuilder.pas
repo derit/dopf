@@ -23,6 +23,8 @@ uses
 type
   EdTable = class(EdException);
 
+  EdSqlBuilder = class(EdException);
+
   { TdGTable }
 
   generic TdGTable<T> = class(TdObject)
@@ -55,6 +57,8 @@ type
   generic TdGSqlBuilder<T> = class(TdSqlBuilder)
   private
     FTable: T;
+  protected
+    procedure CheckTableName;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -127,10 +131,12 @@ end;
 procedure TdGTable.SetName(const AValue: string);
 begin
   if Trim(AValue) = '' then
-    raise EdTable.Create('Name must not be empty.');
-  StrLower(PChar(AValue));
+    Exit;
   if AValue <> FName then
+  begin
     FName := AValue;
+    StrLower(PChar(FName));
+  end;
 end;
 
 { TdGSqlBuilder }
@@ -145,6 +151,12 @@ destructor TdGSqlBuilder.Destroy;
 begin
   FTable.Free;
   inherited Destroy;
+end;
+
+procedure TdGSqlBuilder.CheckTableName;
+begin
+  if Trim(FTable.Name) = '' then
+    raise EdSqlBuilder.Create('Table name must not be empty.');
 end;
 
 { TdGSelectBuilder }
@@ -179,6 +191,7 @@ procedure TdGSelectBuilder.Build(out ASql: string;
 var
   FS: string;
 begin
+  CheckTableName;
   if MakeFields(FTable, FS, AIgnoreWildcard) then
     ASql := 'select ' + FS + ' from ' + FTable.Name;
 end;
@@ -216,6 +229,7 @@ procedure TdGInsertBuilder.Build(out ASql: string;
 var
   FS, PS: string;
 begin
+  CheckTableName;
   if MakeFields(FTable, FS, PS, AIgnorePrimaryKeys) then
     ASql := 'insert into ' + FTable.Name + ' (' + FS + ') ' +
       'values (' + PS + ')';
@@ -258,6 +272,7 @@ procedure TdGUpdateBuilder.Build(out ASql: string;
 var
   FS, PS: string;
 begin
+  CheckTableName;
   if MakeFields(FTable, FS, PS, AIgnorePrimaryKeys) then
     ASQL := 'update ' + FTable.Name + ' set ' + FS + ' where ' + PS;
 end;
@@ -296,6 +311,7 @@ procedure TdGDeleteBuilder.Build(out ASql: string;
 var
   PS: string;
 begin
+  CheckTableName;
   if MakeParams(FTable, PS, AIgnoreProperties) then
     ASQL := 'delete from ' + FTable.Name + ' where ' + PS;
 end;

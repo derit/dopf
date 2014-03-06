@@ -325,6 +325,7 @@ type
   protected
     procedure CheckEntity({%H-}AEntity: T3);
     procedure CheckEntities({%H-}AEntities: TEntities);
+    procedure CheckTableName;
     function InternalFind({%H-}AEntity: T3; const ACondition: string): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
   public
@@ -1402,8 +1403,15 @@ begin
     raise EdOpf.Create('Entities must not be nil.');
 end;
 
+procedure TdGOpf.CheckTableName;
+begin
+  if Trim(FTable.Name) = '' then
+    raise EdTable.Create('Table name must not be empty.');
+end;
+
 procedure TdGOpf.Empty;
 begin
+  CheckTableName;
   SetSql('delete from ' + FTable.Name);
   FQuery.Execute;
 end;
@@ -1412,6 +1420,7 @@ function TdGOpf.InternalFind(AEntity: T3; const ACondition: string): Boolean;
 var
   FS: string = '';
 begin
+  CheckTableName;
   TSelectBuilder.MakeFields(FTable, FS, True);
   SetSql('select ' + FS + ' from ' + FTable.Name);
   if ACondition <> '' then
@@ -1483,6 +1492,7 @@ function TdGOpf.List(AEntity: T3; AEntities: TEntities;
 var
   FS: string = '';
 begin
+  CheckTableName;
   CheckEntity(AEntity);
   CheckEntities(AEntities);
   if ASql = '' then
@@ -1505,6 +1515,7 @@ function TdGOpf.List(AEntities: TEntities; const ASql: string; AParams: TObject)
 var
   FS: string = '';
 begin
+  CheckTableName;
   CheckEntities(AEntities);
   if ASql = '' then
   begin
