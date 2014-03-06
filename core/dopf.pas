@@ -311,18 +311,17 @@ type
   { TdGOpf }
 
   generic TdGOpf<T1, T2, T3> = class(TdComponent)
-  private type
+  public type
     TTable = specialize TdGTable<T3>;
     TSelectBuilder = specialize TdGSelectBuilder<TTable>;
     TInsertBuilder = specialize TdGInsertBuilder<TTable>;
     TUpdateBuilder = specialize TdGUpdateBuilder<TTable>;
     TDeleteBuilder = specialize TdGDeleteBuilder<TTable>;
+    TEntities = specialize TFPGObjectList<T3>;
   private
     FConnection: T1;
     FQuery: T2;
     FTable: TTable;
-  public type
-    TEntities = specialize TFPGObjectList<T3>;
   protected
     procedure CheckEntity({%H-}AEntity: T3);
     procedure CheckEntities({%H-}AEntities: TEntities);
