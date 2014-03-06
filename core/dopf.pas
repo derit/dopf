@@ -1511,9 +1511,10 @@ begin
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
+  begin
     GetFields(AEntity);
-  if Result then
     PopulateEntities(AEntities);
+  end;
 end;
 
 function TdGOpf.List(AEntities: TEntities; const ASql: string; AParams: TObject): Boolean;
