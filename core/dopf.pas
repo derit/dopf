@@ -1420,11 +1420,16 @@ function TdGOpf.InternalFind(AEntity: T3; const ACondition: string): Boolean;
 var
   FS: string = '';
 begin
-  CheckTableName;
-  TSelectBuilder.MakeFields(FTable, FS, True);
-  SetSql('select ' + FS + ' from ' + FTable.Name);
-  if ACondition <> '' then
-    FQuery.SQL.Add('where ' + ACondition);
+  if ShortCompareText(Copy(ACondition, 1, 7), 'select ') = 0 then
+    SetSql(ACondition)
+  else
+  begin
+    CheckTableName;
+    TSelectBuilder.MakeFields(FTable, FS, True);
+    SetSql('select ' + FS + ' from ' + FTable.Name);
+    if ACondition <> '' then
+      FQuery.SQL.Add('where ' + ACondition);
+  end;
   SetParams(AEntity);
   FQuery.Open;
   Result := FQuery.Count > 0;
