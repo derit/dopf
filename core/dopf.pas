@@ -342,10 +342,10 @@ type
     function Find(AEntity: T3; const ACondition: string): Boolean; overload; virtual;
     function Find(AEntity: T3; AEntities: TEntities;
       const ACondition: string): Boolean; overload; virtual;
-    function List(AEntity: T3; AEntities: TEntities;
+    function Search(AEntity: T3; AEntities: TEntities;
       const ASql: string = ''): Boolean; virtual;
-    function List(AEntities: TEntities; const ASql: string = '';
-      AParams: TObject = nil): Boolean; virtual;
+    function List(AEntities: TEntities; AParams: TObject = nil;
+      const ASql: string = ''): Boolean; virtual;
     procedure Add(AEntity: T3;
       {%H-}const AIgnorePrimaryKeys: Boolean = True); virtual;
     procedure Modify(AEntity: T3;
@@ -1492,8 +1492,8 @@ begin
     PopulateEntities(AEntities);
 end;
 
-function TdGOpf.List(AEntity: T3; AEntities: TEntities;
-  const ASql: string): Boolean;
+function TdGOpf.Search(AEntity: T3; AEntities: TEntities; const ASql: string
+  ): Boolean;
 var
   FS: string = '';
 begin
@@ -1517,7 +1517,8 @@ begin
   end;
 end;
 
-function TdGOpf.List(AEntities: TEntities; const ASql: string; AParams: TObject): Boolean;
+function TdGOpf.List(AEntities: TEntities; AParams: TObject;
+  const ASql: string): Boolean;
 var
   FS: string = '';
 begin
