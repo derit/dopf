@@ -6,16 +6,15 @@ uses
   dOpf, dSQLdbBroker, dbutils, person, sysutils;
 
 type
-  Topf = specialize TdGOpf<TdSQLdbConnector, TdSQLdbQuery, TPerson>;
+  Topf = specialize TdGSQLdbEntityOpf<TPerson>;
 
 var
-  i, per: TPerson;
+  i: TPerson;
   pers: Topf.TEntities;
   opf: Topf;
 begin
   opf := Topf.Create(dbutils.con, 'person');
   pers := Topf.TEntities.Create;
-  per := TPerson.Create;
   try
     WriteLn('Empty table');
     opf.Empty;
@@ -23,58 +22,58 @@ begin
     WriteLn('Done.');
 
     WriteLn('Add Silvio Clécio');
-    per.Name := 'Silvio Clécio';
-    opf.Add(per);
+    opf.Entity.Name := 'Silvio Clécio';
+    opf.Add;
     WriteLn('Done.');
 
     WriteLn('Add Anonymous');
-    per.Id := 1000;
-    per.Name := 'Anonymous';
-    opf.Add(per, False);
+    opf.Entity.Id := 1000;
+    opf.Entity.Name := 'Anonymous';
+    opf.Add(False);
     WriteLn('Done.');
 
     WriteLn('Add Waldir');
-    per.Id := 1001;
-    per.Name := 'Waldir';
-    opf.Add(per, False);
+    opf.Entity.Id := 1001;
+    opf.Entity.Name := 'Waldir';
+    opf.Add(False);
     WriteLn('Done.');
 
     WriteLn('Add João Morais');
-    per.Name := 'João Morais';
-    opf.Add(per);
+    opf.Entity.Name := 'João Morais';
+    opf.Add;
     WriteLn('Done.');
 
     WriteLn('Add Sven Barth');
-    per.Name := 'Sven Barth';
-    opf.Add(per);
+    opf.Entity.Name := 'Sven Barth';
+    opf.Add;
     WriteLn('Done.');
 
     WriteLn('Modify name of Waldir to Waldir Paim');
-    per.Id := 1001;
-    per.Name := 'Waldir Paim';
-    opf.Modify(per);
+    opf.Entity.Id := 1001;
+    opf.Entity.Name := 'Waldir Paim';
+    opf.Modify;
     WriteLn('Done.');
 
     WriteLn('Remove Anonymous');
-    per.Id := 1000;
-    opf.Remove(per);
+    opf.Entity.Id := 1000;
+    opf.Remove;
     WriteLn('Done.');
 
     WriteLn('Get Waldir Paim');
-    per.Id := 1001;
-    opf.Get(per);
-    WriteLn(per.Id, ', ', per.Name);
+    opf.Entity.Id := 1001;
+    opf.Get;
+    WriteLn(opf.Entity.Id, ', ', opf.Entity.Name);
     WriteLn('Done.');
 
     WriteLn('Find Silvio Clécio by name');
-    per.Name := 'Silvio Clécio';
-    opf.Find(per, 'name = :name');
-    WriteLn(per.Id, ', ', per.Name);
+    opf.Entity.Name := 'Silvio Clécio';
+    opf.Find('name = :name');
+    WriteLn(opf.Entity.Id, ', ', opf.Entity.Name);
     WriteLn('Done.');
 
     WriteLn('Search for names containing "a"');
-    per.Name := '%a%';
-    opf.Find(per, pers, 'name like (:name)');
+    opf.Entity.Name := '%a%';
+    opf.Find(pers, 'name like (:name)');
     for i in pers do
       WriteLn(i.Id, ', ', i.Name);
     pers.Clear;
@@ -88,8 +87,8 @@ begin
     WriteLn('Done.');
 
     WriteLn('Search for names containing "a" (order by id DESC)');
-    per.Name := '%a%';
-    opf.Search(per, pers, 'select * from person where name like (:name) order by id desc');
+    opf.Entity.Name := '%a%';
+    opf.Search(pers, 'select * from person where name like (:name) order by id desc');
     for i in pers do
       WriteLn(i.Id, ', ', i.Name);
     pers.Clear;
@@ -97,7 +96,6 @@ begin
 
     opf.Apply;
   finally
-    per.Free;
     pers.Free;
     opf.Free;
   end;
