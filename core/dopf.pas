@@ -360,6 +360,33 @@ type
     property Table: TTable read FTable write FTable;
   end;
 
+  { TdGEntityOpf }
+
+  generic TdGEntityOpf<T1, T2, T3> = class(specialize TdGOpf<T1, T2, T3>)
+  private
+    FEntity: T3;
+  protected
+    procedure FillEntity; virtual;
+    function CreateEntity: T3; virtual;
+    procedure FreeEntity; virtual;
+  public
+    constructor Create(AConnection: T1;
+      const ATableName: string); reintroduce; override;
+    destructor Destroy; override;
+    function Get: Boolean; overload;
+    function Find(const ACondition: string): Boolean; overload;
+    function Find(AEntities: TEntities;
+      const ACondition: string): Boolean; overload;
+    function List(AEntities: TEntities; AParams: TObject = nil;
+       const ASql: string = ''): Boolean; override;
+    function Search(AEntities: TEntities;
+       const ASql: string = ''): Boolean; overload;
+    procedure Add(const AIgnorePrimaryKeys: Boolean = True); overload;
+    procedure Modify(const AIgnorePrimaryKeys: Boolean = True); overload;
+    procedure Remove(const AIgnoreProperties: Boolean = True); overload;
+    property Entity: T3 read FEntity write FEntity;
+  end;
+
 implementation
 
 procedure NotImplementedError;
@@ -1492,8 +1519,8 @@ begin
     PopulateEntities(AEntities);
 end;
 
-function TdGOpf.Search(AEntity: T3; AEntities: TEntities; const ASql: string
-  ): Boolean;
+function TdGOpf.Search(AEntity: T3; AEntities: TEntities;
+  const ASql: string): Boolean;
 var
   FS: string = '';
 begin
@@ -1607,6 +1634,79 @@ end;
 procedure TdGOpf.Discard;
 begin
   FQuery.Undo;
+end;
+
+{ TdGEntityOpf }
+
+constructor TdGEntityOpf.Create(AConnection: T1; const ATableName: string);
+begin
+  inherited Create(AConnection, ATableName);
+  FEntity := CreateEntity;
+end;
+
+destructor TdGEntityOpf.Destroy;
+begin
+  FreeEntity;
+  inherited Destroy;
+end;
+
+function TdGEntityOpf.CreateEntity: T3;
+begin
+  Result := T3.Create;
+end;
+
+procedure TdGEntityOpf.FreeEntity;
+begin
+  FreeAndNil(FEntity);
+end;
+
+procedure TdGEntityOpf.FillEntity;
+begin
+  GetFields(FEntity);
+end;
+
+function TdGEntityOpf.Get: Boolean;
+begin
+  Result := inherited Get(FEntity);
+end;
+
+function TdGEntityOpf.Find(const ACondition: string): Boolean;
+begin
+  Result := inherited Find(FEntity, ACondition);
+end;
+
+function TdGEntityOpf.Find(AEntities: TEntities;
+  const ACondition: string): Boolean;
+begin
+  Result := inherited Find(FEntity, AEntities, ACondition);
+end;
+
+function TdGEntityOpf.List(AEntities: TEntities; AParams: TObject;
+  const ASql: string): Boolean;
+begin
+  Result := inherited List(AEntities, AParams, ASql);
+  if Result then
+    GetFields(FEntity);
+end;
+
+function TdGEntityOpf.Search(AEntities: TEntities; const ASql: string): Boolean;
+begin
+  Result := inherited Search(FEntity, AEntities, ASql);
+end;
+
+procedure TdGEntityOpf.Add(const AIgnorePrimaryKeys: Boolean);
+begin
+  inherited Add(FEntity, AIgnorePrimaryKeys);
+end;
+
+procedure TdGEntityOpf.Modify(const AIgnorePrimaryKeys: Boolean);
+begin
+  inherited Modify(FEntity, AIgnorePrimaryKeys);
+end;
+
+procedure TdGEntityOpf.Remove(const AIgnoreProperties: Boolean);
+begin
+  inherited Remove(FEntity, AIgnoreProperties);
 end;
 
 end.
