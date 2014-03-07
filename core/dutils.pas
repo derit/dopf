@@ -97,7 +97,14 @@ begin
       tkInteger: F.AsInteger := GetOrdProp(AObject, PI);
       tkInt64, tkQWord: F.AsLargeInt := GetInt64Prop(AObject, PI);
       tkBool: F.AsBoolean := GetOrdProp(AObject, PI) <> 0;
-      tkFloat: F.AsFloat := GetFloatProp(AObject, PI);
+      tkFloat:
+        case PI^.PropType^.Name of
+          'TDate', 'TTime', 'TDateTime':
+            F.AsDateTime := GetFloatProp(AObject, PI);
+          'Currency': F.AsCurrency := GetFloatProp(AObject, PI);
+        else
+          F.AsFloat := GetFloatProp(AObject, PI);
+        end;
       tkEnumeration: F.AsString := GetEnumProp(AObject, PI);
       tkSet: F.AsString := GetSetProp(AObject, PI, False);
     end;
@@ -164,7 +171,15 @@ begin
       tkInteger: P.AsInteger := GetOrdProp(AObject, PI);
       tkInt64, tkQWord: P.AsLargeInt := GetInt64Prop(AObject, PI);
       tkBool: P.AsBoolean := GetOrdProp(AObject, PI) <> 0;
-      tkFloat: P.AsFloat := GetFloatProp(AObject, PI);
+      tkFloat:
+        case PI^.PropType^.Name of
+          'TDate': P.AsDate := Trunc(GetFloatProp(AObject, PI));
+          'TTime': P.AsTime := Frac(GetFloatProp(AObject, PI));
+          'TDateTime': P.AsDateTime := GetFloatProp(AObject, PI);
+          'Currency': P.AsCurrency := GetFloatProp(AObject, PI);
+        else
+          P.AsFloat := GetFloatProp(AObject, PI);
+        end;
       tkEnumeration: P.AsString := GetEnumProp(AObject, PI);
       tkSet: P.AsString := GetSetProp(AObject, PI, False);
     end;
