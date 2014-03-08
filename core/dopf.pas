@@ -452,7 +452,9 @@ begin
     if Assigned(FStream) then
     begin
       FStream.Write(AMsg[1], Length(AMsg));
-      FStream.Write(Pointer(LineEnding)^, Length(LineEnding));
+      FStream.Write(
+        {$IFDEF MSWINDOWS}LineEnding[1]{$ELSE}Pointer(LineEnding)^{$ENDIF},
+        Length(LineEnding));
     end;
     if Assigned(FOnLogging) then
       FOnLogging(AType, AMsg);
