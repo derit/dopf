@@ -342,7 +342,7 @@ type
     function Find(AEntity: T3; const ACondition: string): Boolean; overload; virtual;
     function Find(AEntity: T3; AEntities: TEntities;
       const ACondition: string): Boolean; overload; virtual;
-    function Search(AEntity: T3; AEntities: TEntities;
+    function Search(AEntity: T3; AEntities: TEntities; AParams: TObject = nil;
       const ASql: string = ''): Boolean; virtual;
     function List(AEntities: TEntities; AParams: TObject = nil;
       const ASql: string = ''): Boolean; virtual;
@@ -379,7 +379,7 @@ type
       const ACondition: string): Boolean; overload;
     function List(AEntities: TEntities; AParams: TObject = nil;
        const ASql: string = ''): Boolean; override;
-    function Search(AEntities: TEntities;
+    function Search(AEntities: TEntities; AParams: TObject = nil;
        const ASql: string = ''): Boolean; overload;
     procedure Add(const AIgnorePrimaryKeys: Boolean = True); overload;
     procedure Modify(const AIgnorePrimaryKeys: Boolean = True); overload;
@@ -1521,7 +1521,7 @@ begin
     PopulateEntities(AEntities);
 end;
 
-function TdGOpf.Search(AEntity: T3; AEntities: TEntities;
+function TdGOpf.Search(AEntity: T3; AEntities: TEntities; AParams: TObject;
   const ASql: string): Boolean;
 var
   FS: string = '';
@@ -1537,6 +1537,8 @@ begin
   else
     SetSql(ASql);
   SetParams(AEntity);
+  if Assigned(AParams) then
+    dUtils.dSetParams(AParams, FQuery.Params);
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
@@ -1691,9 +1693,10 @@ begin
     GetFields(FEntity);
 end;
 
-function TdGEntityOpf.Search(AEntities: TEntities; const ASql: string): Boolean;
+function TdGEntityOpf.Search(AEntities: TEntities; AParams: TObject;
+  const ASql: string): Boolean;
 begin
-  Result := inherited Search(FEntity, AEntities, ASql);
+  Result := inherited Search(FEntity, AEntities, AParams, ASql);
 end;
 
 procedure TdGEntityOpf.Add(const AIgnorePrimaryKeys: Boolean);
