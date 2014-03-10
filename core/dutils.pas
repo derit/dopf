@@ -38,6 +38,8 @@ var
   I: Integer;
   P: TParam;
 begin
+  if not Assigned(AParams) then
+    raise EdException.Create('AParams must not be nil.');
   for I := 0 to Pred(AParams.Count) do
   begin
     P := AParams[I];
@@ -57,6 +59,10 @@ var
   F: TField;
   PI: PPropInfo;
 begin
+  if not Assigned(AObject) then
+    raise EdException.Create('AObject must not be nil.');
+  if not Assigned(AFields) then
+    raise EdException.Create('AFields must not be nil.');
   for I := 0 to Pred(AFields.Count) do
   begin
     F := AFields[I];
@@ -83,8 +89,16 @@ var
   I: Integer;
   PI: PPropInfo;
 begin
+  if not Assigned(AObject) then
+    raise EdException.Create('AObject must not be nil.');
+  if APropCount < 1 then
+    raise EdException.CreateFmt(
+      'APropCount must be greater than zero. Probably, you need to publish ' +
+      'the properties in "%s".', [AObject.ClassName]);
   if not Assigned(APropList) then
     raise EdException.Create('APropList must not be nil.');
+  if not Assigned(AFields) then
+    raise EdException.Create('AFields must not be nil.');
   for I := 0 to Pred(APropCount) do
   begin
     PI := APropList^[I];
@@ -116,6 +130,8 @@ var
   C: Integer;
   PL: PPropList = nil;
 begin
+  if not Assigned(AObject) then
+    raise EdException.Create('AObject must not be nil.');
   C := GetPropList(PTypeInfo(AObject.ClassInfo), PL);
   if Assigned(PL) then
     try
@@ -131,6 +147,10 @@ var
   P: TParam;
   PI: PPropInfo;
 begin
+  if not Assigned(AObject) then
+    raise EdException.Create('AObject must not be nil.');
+  if not Assigned(AParams) then
+    raise EdException.Create('AParams must not be nil.');
   for I := 0 to Pred(AParams.Count) do
   begin
     P := AParams[I];
@@ -157,8 +177,16 @@ var
   I: Integer;
   PI: PPropInfo;
 begin
+  if not Assigned(AObject) then
+    raise EdException.Create('AObject must not be nil.');
+  if APropCount < 1 then
+    raise EdException.CreateFmt(
+      'APropCount must be greater than zero. Probably, you need to publish ' +
+      'the properties in "%s".', [AObject.ClassName]);
   if not Assigned(APropList) then
     raise EdException.Create('APropList must not be nil.');
+  if not Assigned(AParams) then
+    raise EdException.Create('AParams must not be nil.');
   for I := 0 to Pred(APropCount) do
   begin
     PI := APropList^[I];
@@ -191,6 +219,8 @@ var
   C: Integer;
   PL: PPropList = nil;
 begin
+  if not Assigned(AObject) then
+    raise EdException.Create('AObject must not be nil.');
   C := GetPropList(PTypeInfo(AObject.ClassInfo), PL);
   if Assigned(PL) then
     try
