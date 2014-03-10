@@ -88,7 +88,8 @@ begin
 
     WriteLn('Search for names containing "a" (order by id DESC)');
     opf.Entity.Name := '%a%';
-    opf.Search(pers, 'select * from person where name like (:name) order by id desc');
+    opf.Search(pers, nil,
+      'select * from person where name like (:name) order by id desc');
     for i in pers do
       WriteLn(i.Id, ', ', i.Name);
     pers.Clear;
