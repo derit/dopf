@@ -94,7 +94,7 @@ begin
   if APropCount < 1 then
     raise EdException.CreateFmt(
       'APropCount must be greater than zero. Probably, you need to publish ' +
-      'the properties in "%s".', [AObject.ClassName]);
+      'the properties in the "%s" class.', [AObject.ClassName]);
   if not Assigned(APropList) then
     raise EdException.Create('APropList must not be nil.');
   if not Assigned(AFields) then
@@ -182,7 +182,7 @@ begin
   if APropCount < 1 then
     raise EdException.CreateFmt(
       'APropCount must be greater than zero. Probably, you need to publish ' +
-      'the properties in "%s".', [AObject.ClassName]);
+      'the properties in the "%s" class.', [AObject.ClassName]);
   if not Assigned(APropList) then
     raise EdException.Create('APropList must not be nil.');
   if not Assigned(AParams) then
