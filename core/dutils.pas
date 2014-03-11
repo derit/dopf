@@ -35,8 +35,8 @@ implementation
 procedure dParameterizeSQL(var ASQL: string; AParams: TParams);
 var
   V: string;
-  I: Integer;
   P: TParam;
+  I: Integer;
 begin
   if not Assigned(AParams) then
     raise EdException.Create('AParams must not be nil.');
@@ -46,11 +46,16 @@ begin
     case P.DataType of
       ftString, ftDate, ftTime, ftDateTime, ftMemo, ftFixedChar, ftGuid:
         V := QuotedStr(P.AsString);
-      ftCurrency: V := FloatToStr(P.AsFloat);
+      ftFloat, ftCurrency, ftBCD:
+        begin
+          V := FloatToStr(P.AsFloat);
+          V := StringReplace(V, ',', '.', []);
+        end
     else
       V := P.AsString;
     end;
-    ASQL := StringReplace(ASQL, ':' + P.Name, V, [rfIgnoreCase, rfReplaceAll]);
+    { TODO: use exactly replace instead of StringReplace. }
+    ASQL := StringReplace(ASQL, ':' + P.Name, V, [rfIgnoreCase]);
   end;
 end;
 
