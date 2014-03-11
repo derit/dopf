@@ -43,11 +43,12 @@ begin
   for I := 0 to Pred(AParams.Count) do
   begin
     P := AParams[I];
-    V := P.AsString;
     case P.DataType of
       ftString, ftDate, ftTime, ftDateTime, ftMemo, ftFixedChar, ftGuid:
-        V := QuotedStr(V);
+        V := QuotedStr(P.AsString);
       ftCurrency: V := FloatToStr(P.AsFloat);
+    else
+      V := P.AsString;
     end;
     ASQL := StringReplace(ASQL, ':' + P.Name, V, [rfIgnoreCase, rfReplaceAll]);
   end;
@@ -70,14 +71,16 @@ begin
     if not Assigned(PI) then
       Continue;
     case F.DataType of
-      ftFixedWideChar, ftWideString, ftFixedChar,
-        ftString: SetStrProp(AObject, PI, F.AsString);
+      ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftWideMemo,
+        ftGuid: SetStrProp(AObject, PI, F.AsString);
       ftSmallInt, ftInteger, ftAutoInc,
         ftWord: SetOrdProp(AObject, PI, F.AsInteger);
       ftLargeInt: SetInt64Prop(AObject, PI, F.AsLargeInt);
-      ftFloat: SetFloatProp(AObject, PI, F.AsFloat);
+      ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, F.AsFloat);
       ftBoolean: SetOrdProp(AObject, PI, Ord(F.AsBoolean));
-      ftDate, ftTime, ftDateTime: SetFloatProp(AObject, PI, F.AsDateTime);
+      ftDate, ftTime, ftDateTime, ftTimeStamp:
+        SetFloatProp(AObject, PI, F.AsDateTime);
+      ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
     end;
   end;
 end;
@@ -115,7 +118,6 @@ begin
         case PI^.PropType^.Name of
           'TDate', 'TTime', 'TDateTime':
             F.AsDateTime := GetFloatProp(AObject, PI);
-          'Currency': F.AsCurrency := GetFloatProp(AObject, PI);
         else
           F.AsFloat := GetFloatProp(AObject, PI);
         end;
@@ -158,14 +160,16 @@ begin
     if not Assigned(PI) then
       Continue;
     case P.DataType of
-      ftFixedWideChar, ftWideString, ftFixedChar,
-        ftString: SetStrProp(AObject, PI, P.AsString);
+      ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
+        ftWideMemo: SetStrProp(AObject, PI, P.AsString);
       ftSmallInt, ftInteger, ftAutoInc,
         ftWord: SetOrdProp(AObject, PI, P.AsInteger);
       ftLargeInt: SetInt64Prop(AObject, PI, P.AsLargeInt);
-      ftFloat: SetFloatProp(AObject, PI, P.AsFloat);
+      ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, P.AsFloat);
       ftBoolean: SetOrdProp(AObject, PI, Ord(P.AsBoolean));
-      ftDate, ftTime, ftDateTime: SetFloatProp(AObject, PI, P.AsDateTime);
+      ftDate, ftTime, ftDateTime, ftTimeStamp:
+        SetFloatProp(AObject, PI, P.AsDateTime);
+      ftVariant: SetVariantProp(AObject, PI, P.Value);
     end;
   end;
 end;
@@ -204,7 +208,6 @@ begin
           'TDate': P.AsDate := Trunc(GetFloatProp(AObject, PI));
           'TTime': P.AsTime := Frac(GetFloatProp(AObject, PI));
           'TDateTime': P.AsDateTime := GetFloatProp(AObject, PI);
-          'Currency': P.AsCurrency := GetFloatProp(AObject, PI);
         else
           P.AsFloat := GetFloatProp(AObject, PI);
         end;
