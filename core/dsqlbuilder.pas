@@ -33,6 +33,7 @@ type
     FPropCount: Integer;
     FPropList: PPropList;
     FName: string;
+    FIgnoredFields: TStrings;
     procedure SetName(const AValue: string);
   public
     constructor Create; virtual;
@@ -42,6 +43,7 @@ type
   published
     property Name: string read FName write SetName;
     property PrimaryKeys: TStrings read FPrimaryKeys;
+    property IgnoredFields: TStrings read FIgnoredFields;
   end;
 
   { TdSqlBuilder }
@@ -118,6 +120,7 @@ begin
   FPropCount := GetPropList(PTypeInfo(T.ClassInfo), FPropList);
   FPrimaryKeys := TStringList.Create;
   FPrimaryKeys.Add(dDefaultPrimaryKeyName);
+  FIgnoredFields := TStringList.Create;
 end;
 
 destructor TdGTable.Destroy;
@@ -125,6 +128,7 @@ begin
   if Assigned(FPropList) then
     FreeMem(FPropList);
   FPrimaryKeys.Free;
+  FIgnoredFields.Free;
   inherited Destroy;
 end;
 
@@ -179,6 +183,8 @@ begin
   for I := 0 to Pred(ATable.PropCount) do
   begin
     N := ATable.PropList^[I]^.Name;
+    if ATable.IgnoredFields.IndexOf(N) > -1 then
+      Continue;
     N += ', ';
     AFields += N;
   end;
@@ -212,7 +218,8 @@ begin
   for I := 0 to Pred(ATable.PropCount) do
   begin
     N := ATable.PropList^[I]^.Name;
-    if AIgnorePrimaryKeys and (ATable.PrimaryKeys.IndexOf(N) > -1) then
+    if (ATable.IgnoredFields.IndexOf(N) > -1) or
+      (AIgnorePrimaryKeys and (ATable.PrimaryKeys.IndexOf(N) > -1)) then
       Continue;
     N += ', ';
     AFields += N;
@@ -251,6 +258,8 @@ begin
   for I := 0 to Pred(ATable.PropCount) do
   begin
     N := ATable.PropList^[I]^.Name;
+    if ATable.IgnoredFields.IndexOf(N) > -1 then
+      Continue;
     X := ATable.PrimaryKeys.IndexOf(N);
     if X > -1 then
     begin
@@ -292,6 +301,8 @@ begin
   for I := 0 to Pred(ATable.PropCount) do
   begin
     N := ATable.PropList^[I]^.Name;
+    if ATable.IgnoredFields.IndexOf(N) > -1 then
+      Continue;
     X := ATable.PrimaryKeys.IndexOf(N);
     if X > -1 then
     begin
