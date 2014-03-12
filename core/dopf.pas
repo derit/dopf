@@ -1579,7 +1579,7 @@ begin
   CheckEntity(AEntity);
   B := TInsertBuilder.Create(nil);
   try
-    B.Table.Name := FTable.Name;
+    B.SetTable(Table);
     B.Build(S, AIgnorePrimaryKeys);
     SetSql(S);
     SetParams(AEntity);
@@ -1599,7 +1599,7 @@ begin
   CheckEntity(AEntity);
   B := TUpdateBuilder.Create(nil);
   try
-    B.Table.Name := FTable.Name;
+    B.SetTable(Table);
     B.Build(S, AIgnorePrimaryKeys);
     SetSql(S);
     SetParams(AEntity);
@@ -1619,7 +1619,7 @@ begin
   CheckEntity(AEntity);
   B := TDeleteBuilder.Create(nil);
   try
-    B.Table.Name := FTable.Name;
+    B.SetTable(Table);
     B.Build(S, AIgnoreProperties);
     SetSql(S);
     SetParams(AEntity);

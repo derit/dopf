@@ -62,9 +62,7 @@ type
   protected
     procedure CheckTableName;
   public
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
-    property Table: T read FTable write FTable;
+    procedure SetTable(ATable: T);
   end;
 
   { TdGSelectBuilder }
@@ -145,22 +143,15 @@ end;
 
 { TdGSqlBuilder }
 
-constructor TdGSqlBuilder.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  FTable := T.Create;
-end;
-
-destructor TdGSqlBuilder.Destroy;
-begin
-  FTable.Free;
-  inherited Destroy;
-end;
-
 procedure TdGSqlBuilder.CheckTableName;
 begin
   if Trim(FTable.Name) = '' then
     raise EdSqlBuilder.Create('Table name must not be empty.');
+end;
+
+procedure TdGSqlBuilder.SetTable(ATable: T);
+begin
+  FTable := ATable;
 end;
 
 { TdGSelectBuilder }
@@ -171,15 +162,14 @@ var
   N: string;
   I: Integer;
 begin
-  if not AIgnoreWildcard then
-  begin
-    Result := True;
-    AFields := '*';
-    Exit;
-  end;
   Result := (ATable <> nil) and Assigned(ATable.PropList);
   if not Result then
     Exit;
+  if not AIgnoreWildcard then
+  begin
+    AFields := '*';
+    Exit;
+  end;
   for I := 0 to Pred(ATable.PropCount) do
   begin
     N := ATable.PropList^[I]^.Name;
@@ -197,9 +187,11 @@ procedure TdGSelectBuilder.Build(out ASql: string;
 var
   FS: string;
 begin
-  CheckTableName;
   if MakeFields(FTable, FS, AIgnoreWildcard) then
+  begin
+    CheckTableName;
     ASql := 'select ' + FS + ' from ' + FTable.Name;
+  end;
 end;
 
 { TdGInsertBuilder }
@@ -236,10 +228,12 @@ procedure TdGInsertBuilder.Build(out ASql: string;
 var
   FS, PS: string;
 begin
-  CheckTableName;
   if MakeFields(FTable, FS, PS, AIgnorePrimaryKeys) then
+  begin
+    CheckTableName;
     ASql := 'insert into ' + FTable.Name + ' (' + FS + ') ' +
       'values (' + PS + ')';
+  end;
 end;
 
 { TdGUpdateBuilder }
@@ -281,9 +275,11 @@ procedure TdGUpdateBuilder.Build(out ASql: string;
 var
   FS, PS: string;
 begin
-  CheckTableName;
   if MakeFields(FTable, FS, PS, AIgnorePrimaryKeys) then
+  begin
+    CheckTableName;
     ASQL := 'update ' + FTable.Name + ' set ' + FS + ' where ' + PS;
+  end;
 end;
 
 { TdGDeleteBuilder }
@@ -295,7 +291,7 @@ var
   I, X: Integer;
 begin
   AParams := '';
-  Result := (ATable <> nil) or Assigned(ATable.PropList);
+  Result := (ATable <> nil) and Assigned(ATable.PropList);
   if not Result then
     Exit;
   for I := 0 to Pred(ATable.PropCount) do
@@ -322,9 +318,11 @@ procedure TdGDeleteBuilder.Build(out ASql: string;
 var
   PS: string;
 begin
-  CheckTableName;
   if MakeParams(FTable, PS, AIgnoreProperties) then
+  begin
+    CheckTableName;
     ASQL := 'delete from ' + FTable.Name + ' where ' + PS;
+  end;
 end;
 
 end.
