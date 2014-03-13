@@ -335,6 +335,8 @@ type
     procedure GetFieldNames(out AFieldNames: string); virtual;
     procedure GetConditions(out APairs: string;
       {%H-}const AIgnoreProperties: Boolean = True); virtual;
+    function GetConditions(
+      {%H-}const AIgnoreProperties: Boolean = True): string; virtual;
     procedure SetSql(const ASql: string); virtual;
     procedure SetParams({%H-}AEntity: TObject); virtual;
     procedure GetFields({%H-}AEntity: TObject); virtual;
@@ -1416,6 +1418,11 @@ procedure TdGOpf.GetConditions(out APairs: string;
   const AIgnoreProperties: Boolean);
 begin
   TDeleteBuilder.MakeParams(FTable, APairs, AIgnoreProperties);
+end;
+
+function TdGOpf.GetConditions(const AIgnoreProperties: Boolean): string;
+begin
+  GetConditions(Result, AIgnoreProperties);
 end;
 
 procedure TdGOpf.CheckEntity(AEntity: T3);
