@@ -197,6 +197,7 @@ type
     function Field({%H-}const AName: string): TField; virtual;
     function FieldDef({%H-}const AName: string): TFieldDef; virtual;
     function Count: Int64; virtual;
+    function IsEmpty: Boolean; virtual;
     function GetBookmark: TBookmark; virtual;
     procedure GotoBookmark({%H-}ABookmark: TBookmark); virtual;
     property BOF: Boolean read GetBOF;
@@ -271,6 +272,7 @@ type
     function Field({%H-}const AName: string): TField;
     function FieldDef({%H-}const AName: string): TFieldDef;
     function Count: Int64;
+    function IsEmpty: Boolean;
     function GetBookmark: TBookmark;
     procedure GotoBookmark({%H-}ABookmark: TBookmark);
     property Connection: T2 read FConnection write FConnection;
@@ -916,6 +918,12 @@ begin
   NotImplementedError;
 end;
 
+function TdQueryBroker.IsEmpty: Boolean;
+begin
+  Result := False;
+  NotImplementedError;
+end;
+
 function TdQueryBroker.GetBookmark: TBookmark;
 begin
   Result := nil;
@@ -1330,6 +1338,12 @@ function TdGQuery.Count: Int64;
 begin
   CheckBroker;
   Result := FBroker.Count;
+end;
+
+function TdGQuery.IsEmpty: Boolean;
+begin
+  CheckBroker;
+  Result := FBroker.IsEmpty;
 end;
 
 function TdGQuery.GetBookmark: TBookmark;

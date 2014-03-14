@@ -116,6 +116,7 @@ type
     function Field(const AName: string): TField; override;
     function FieldDef(const AName: string): TFieldDef; override;
     function Count: Int64; override;
+    function IsEmpty: Boolean; override;
     function GetBookmark: TBookmark; override;
     procedure GotoBookmark(ABookmark: TBookmark); override;
   end;
@@ -542,6 +543,11 @@ end;
 function TdSQLdbQueryBroker.Count: Int64;
 begin
   Result := FQuery.RecordCount;
+end;
+
+function TdSQLdbQueryBroker.IsEmpty: Boolean;
+begin
+  Result := FQuery.IsEmpty;
 end;
 
 function TdSQLdbQueryBroker.GetBookmark: TBookmark;
