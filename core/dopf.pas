@@ -176,6 +176,8 @@ type
     procedure ApplyRetaining; virtual;
     procedure Undo; virtual;
     procedure UndoRetaining; virtual;
+    procedure Commit; virtual;
+    procedure Rollback; virtual;
     procedure Append; virtual;
     procedure Insert; virtual;
     procedure Edit; virtual;
@@ -251,6 +253,8 @@ type
     procedure ApplyRetaining;
     procedure Undo;
     procedure UndoRetaining;
+    procedure Commit;
+    procedure Rollback;
     procedure Append;
     procedure Insert;
     procedure Edit;
@@ -811,6 +815,16 @@ begin
   NotImplementedError;
 end;
 
+procedure TdQueryBroker.Commit;
+begin
+  NotImplementedError;
+end;
+
+procedure TdQueryBroker.Rollback;
+begin
+  NotImplementedError;
+end;
+
 procedure TdQueryBroker.Append;
 begin
   NotImplementedError;
@@ -1205,6 +1219,18 @@ begin
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.UndoRetaining');
   FBroker.UndoRetaining;
+end;
+
+procedure TdGQuery.Commit;
+begin
+  CheckBroker;
+  FBroker.Commit;
+end;
+
+procedure TdGQuery.Rollback;
+begin
+  CheckBroker;
+  FBroker.Rollback;
 end;
 
 procedure TdGQuery.Append;

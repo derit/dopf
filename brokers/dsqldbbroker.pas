@@ -95,6 +95,8 @@ type
     procedure ApplyRetaining; override;
     procedure Undo; override;
     procedure UndoRetaining; override;
+    procedure Commit; override;
+    procedure Rollback; override;
     procedure Append; override;
     procedure Insert; override;
     procedure Edit; override;
@@ -442,6 +444,23 @@ begin
       FQuery.CancelUpdates;
     FCon.Transaction.RollbackRetaining;
   end;
+end;
+
+procedure TdSQLdbQueryBroker.Commit;
+begin
+  if Assigned(FCon) and FCon.Transaction.Active then
+    try
+      FCon.Transaction.Commit;
+    except
+      FCon.Transaction.Rollback;
+      raise;
+    end;
+end;
+
+procedure TdSQLdbQueryBroker.Rollback;
+begin
+  if Assigned(FCon) and FCon.Transaction.Active then
+    FCon.Transaction.Rollback;
 end;
 
 procedure TdSQLdbQueryBroker.Append;
