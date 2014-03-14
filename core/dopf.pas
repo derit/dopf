@@ -1193,7 +1193,7 @@ procedure TdGQuery.Apply;
 begin
   CheckBroker;
   CheckConnection;
-  Connection.Logger.Log(ltCustom, 'Trying Query.Apply');
+  Connection.Logger.Log(ltTransaction, 'Trying Query.Apply');
   FBroker.Apply;
 end;
 
@@ -1201,7 +1201,7 @@ procedure TdGQuery.ApplyRetaining;
 begin
   CheckBroker;
   CheckConnection;
-  Connection.Logger.Log(ltCustom, 'Trying Query.ApplyRetaining');
+  Connection.Logger.Log(ltTransaction, 'Trying Query.ApplyRetaining');
   FBroker.ApplyRetaining;
 end;
 
@@ -1209,7 +1209,7 @@ procedure TdGQuery.Undo;
 begin
   CheckBroker;
   CheckConnection;
-  Connection.Logger.Log(ltCustom, 'Trying Query.Undo');
+  Connection.Logger.Log(ltTransaction, 'Trying Query.Undo');
   FBroker.Undo;
 end;
 
@@ -1217,19 +1217,23 @@ procedure TdGQuery.UndoRetaining;
 begin
   CheckBroker;
   CheckConnection;
-  Connection.Logger.Log(ltCustom, 'Trying Query.UndoRetaining');
+  Connection.Logger.Log(ltTransaction, 'Trying Query.UndoRetaining');
   FBroker.UndoRetaining;
 end;
 
 procedure TdGQuery.Commit;
 begin
   CheckBroker;
+  CheckConnection;
+  Connection.Logger.Log(ltTransaction, 'Trying Query.Commit');
   FBroker.Commit;
 end;
 
 procedure TdGQuery.Rollback;
 begin
   CheckBroker;
+  CheckConnection;
+  Connection.Logger.Log(ltTransaction, 'Trying Query.Rollback');
   FBroker.Rollback;
 end;
 
