@@ -40,6 +40,7 @@ type
   TdLogger = class(TdObject)
   private
     FActive: Boolean;
+    FDirectory: string;
     FFileName: TFileName;
     FFilter: TdLogFilter;
     FOnLogging: TdLoggingEvent;
@@ -56,6 +57,7 @@ type
     procedure LogFmt(const AType: TdLogType; const AMsg: string;
       const AArgs: array of const);
     property Active: Boolean read FActive write SetActive;
+    property Directory: string read FDirectory write FDirectory;
     property Filter: TdLogFilter read FFilter write FFilter;
     property FileName: TFileName read FFileName write SetFileName;
     property Overwrite: Boolean read FOverwrite write FOverwrite;
@@ -429,7 +431,8 @@ begin
   begin
     FFileName := AValue;
     FreeAndNil(FStream);
-    F := ChangeFileExt(FFileName, '_' + FormatDateTime('yyyymmdd', Date) +
+    F := IncludeTrailingPathDelimiter(FDirectory) +
+      ChangeFileExt(FFileName, '_' + FormatDateTime('yyyymmdd', Date) +
       ExtractFileExt(FFileName));
     if (not FOverwrite) and FileExists(F) then
     begin
