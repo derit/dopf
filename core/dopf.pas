@@ -1404,10 +1404,10 @@ var
 begin
   CheckBroker;
   CheckConnection;
+  S := Trim(SQL.Text);
+  dParameterizeSQL(S, Params);
   Connection.Logger.Log(ltSQL, 'Trying Query.Open: ' + S);
   try
-    S := Trim(SQL.Text);
-    dParameterizeSQL(S, Params);
     FBroker.Open;
   except
     on E: Exception do
@@ -1466,10 +1466,10 @@ var
 begin
   CheckBroker;
   CheckConnection;
+  S := Trim(SQL.Text);
+  dParameterizeSQL(S, Params);
   Connection.Logger.Log(ltSQL, 'Trying Query.Execute: ' + S);
   try
-    S := Trim(SQL.Text);
-    dParameterizeSQL(S, Params);
     FBroker.Execute;
   except
     on E: Exception do
