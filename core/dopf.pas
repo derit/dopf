@@ -52,6 +52,8 @@ type
     constructor Create(const AFileName: TFileName); overload; virtual;
     destructor Destroy; override;
     procedure Log(const AType: TdLogType; AMsg: string);
+    procedure LogFmt(const AType: TdLogType; AMsg: string;
+      const AArgs: array of const);
     property Active: Boolean read FActive write SetActive;
     property Filter: TdLogFilter read FFilter write FFilter;
     property FileName: TFileName read FFileName write SetFileName;
@@ -467,6 +469,12 @@ begin
     if Assigned(FOnLogging) then
       FOnLogging(AType, AMsg);
   end;
+end;
+
+procedure TdLogger.LogFmt(const AType: TdLogType; AMsg: string;
+  const AArgs: array of const);
+begin
+  Log(AType, Format(AMsg, AArgs));
 end;
 
 { TdConnectionBroker }
