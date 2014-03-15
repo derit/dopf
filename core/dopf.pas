@@ -457,6 +457,7 @@ end;
 procedure TdLogger.Log(const AType: TdLogType; AMsg: string);
 var
   T: string;
+  LE: string[Length(LineEnding)] = LineEnding;
 begin
   if FActive and (AType in FFilter) then
   begin
@@ -467,9 +468,7 @@ begin
     if Assigned(FStream) then
     begin
       FStream.Write(AMsg[1], Length(AMsg));
-      FStream.Write(
-        {$IFDEF MSWINDOWS}LineEnding[1]{$ELSE}Pointer(LineEnding)^{$ENDIF},
-        Length(LineEnding));
+      FStream.Write(LE[1], Length(LE));
     end;
     if Assigned(FOnLogging) then
       FOnLogging(AType, AMsg);
