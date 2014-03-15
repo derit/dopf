@@ -29,7 +29,7 @@ type
 
   EdOpf = class(EdException);
 
-  TdLogType = (ltTransaction, ltSQL, ltCustom);
+  TdLogType = (ltTransaction, ltSQL, ltConnection, ltErrors, ltCustom);
 
   TdLogFilter = set of TdLogType;
 
@@ -52,7 +52,7 @@ type
     constructor Create(const AFileName: TFileName); overload; virtual;
     destructor Destroy; override;
     procedure Log(const AType: TdLogType; AMsg: string);
-    procedure LogFmt(const AType: TdLogType; AMsg: string;
+    procedure LogFmt(const AType: TdLogType; const AMsg: string;
       const AArgs: array of const);
     property Active: Boolean read FActive write SetActive;
     property Filter: TdLogFilter read FFilter write FFilter;
@@ -471,7 +471,7 @@ begin
   end;
 end;
 
-procedure TdLogger.LogFmt(const AType: TdLogType; AMsg: string;
+procedure TdLogger.LogFmt(const AType: TdLogType; const AMsg: string;
   const AArgs: array of const);
 begin
   Log(AType, Format(AMsg, AArgs));
@@ -737,47 +737,106 @@ end;
 procedure TdGConnection.Connect;
 begin
   CheckBroker;
-  FBroker.Connect;
+  FLogger.Log(ltConnection, 'Trying Connection.Connect');
+  try
+    FBroker.Connect;
+  except
+    on E: Exception do
+    begin
+      FLogger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGConnection.Disconnect;
 begin
   CheckBroker;
-  FBroker.Disconnect;
+  FLogger.Log(ltConnection, 'Trying Connection.Disconnect');
+  try
+    FBroker.Disconnect;
+  except
+    on E: Exception do
+    begin
+      FLogger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGConnection.StartTransaction;
 begin
   CheckBroker;
-  FBroker.StartTransaction;
+  FLogger.Log(ltTransaction, 'Trying Connection.StartTransaction');
+  try
+    FBroker.StartTransaction;
+  except
+    on E: Exception do
+    begin
+      FLogger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGConnection.Commit;
 begin
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.Commit');
-  FBroker.Commit;
+  try
+    FBroker.Commit;
+  except
+    on E: Exception do
+    begin
+      FLogger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGConnection.CommitRetaining;
 begin
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.CommitRetaining');
-  FBroker.CommitRetaining;
+  try
+    FBroker.CommitRetaining;
+  except
+    on E: Exception do
+    begin
+      FLogger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGConnection.Rollback;
 begin
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.Rollback');
-  FBroker.Rollback;
+  try
+    FBroker.Rollback;
+  except
+    on E: Exception do
+    begin
+      FLogger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGConnection.RollbackRetaining;
 begin
   CheckBroker;
   FLogger.Log(ltTransaction, 'Trying Connection.RollbackRetaining');
-  FBroker.RollbackRetaining;
+  try
+    FBroker.RollbackRetaining;
+  except
+    on E: Exception do
+    begin
+      FLogger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 function TdGConnection.InTransaction: Boolean;
@@ -1186,7 +1245,15 @@ begin
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.ApplyUpdates');
-  FBroker.ApplyUpdates;
+  try
+    FBroker.ApplyUpdates;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.CancelUpdates;
@@ -1194,7 +1261,15 @@ begin
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltCustom, 'Trying Query.CancelUpdates');
-  FBroker.CancelUpdates;
+  try
+    FBroker.CancelUpdates;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.Apply;
@@ -1202,7 +1277,15 @@ begin
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltTransaction, 'Trying Query.Apply');
-  FBroker.Apply;
+  try
+    FBroker.Apply;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.ApplyRetaining;
@@ -1210,7 +1293,15 @@ begin
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltTransaction, 'Trying Query.ApplyRetaining');
-  FBroker.ApplyRetaining;
+  try
+    FBroker.ApplyRetaining;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.Undo;
@@ -1218,7 +1309,15 @@ begin
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltTransaction, 'Trying Query.Undo');
-  FBroker.Undo;
+  try
+    FBroker.Undo;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.UndoRetaining;
@@ -1226,7 +1325,15 @@ begin
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltTransaction, 'Trying Query.UndoRetaining');
-  FBroker.UndoRetaining;
+  try
+    FBroker.UndoRetaining;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.Commit;
@@ -1234,7 +1341,15 @@ begin
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltTransaction, 'Trying Query.Commit');
-  FBroker.Commit;
+  try
+    FBroker.Commit;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.Rollback;
@@ -1242,7 +1357,15 @@ begin
   CheckBroker;
   CheckConnection;
   Connection.Logger.Log(ltTransaction, 'Trying Query.Rollback');
-  FBroker.Rollback;
+  try
+    FBroker.Rollback;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.Append;
@@ -1281,10 +1404,18 @@ var
 begin
   CheckBroker;
   CheckConnection;
-  S := Trim(SQL.Text);
-  dParameterizeSQL(S, Params);
-  Connection.Logger.Log(ltSQL, S);
-  FBroker.Open;
+  Connection.Logger.Log(ltSQL, 'Trying Query.Open: ' + S);
+  try
+    S := Trim(SQL.Text);
+    dParameterizeSQL(S, Params);
+    FBroker.Open;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGQuery.Close;
@@ -1335,10 +1466,18 @@ var
 begin
   CheckBroker;
   CheckConnection;
-  S := Trim(SQL.Text);
-  dParameterizeSQL(S, Params);
-  Connection.Logger.Log(ltSQL, S);
-  FBroker.Execute;
+  Connection.Logger.Log(ltSQL, 'Trying Query.Execute: ' + S);
+  try
+    S := Trim(SQL.Text);
+    dParameterizeSQL(S, Params);
+    FBroker.Execute;
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 function TdGQuery.RowsAffected: Int64;
@@ -1423,25 +1562,57 @@ end;
 procedure TdGEntityQuery.GetFields;
 begin
   Connection.Logger.Log(ltCustom, 'Trying EntityQuery.GetFields');
-  dUtils.dGetFields(FEntity, Fields);
+  try
+    dUtils.dGetFields(FEntity, Fields);
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGEntityQuery.SetFields;
 begin
   Connection.Logger.Log(ltCustom, 'Trying EntityQuery.SetFields');
-  dUtils.dSetFields(FEntity, Fields);
+  try
+    dUtils.dSetFields(FEntity, Fields);
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGEntityQuery.GetParams;
 begin
   Connection.Logger.Log(ltCustom, 'Trying EntityQuery.GetParams');
-  dUtils.dGetParams(FEntity, Params);
+  try
+    dUtils.dGetParams(FEntity, Params);
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 procedure TdGEntityQuery.SetParams;
 begin
   Connection.Logger.Log(ltCustom, 'Trying EntityQuery.SetParams');
-  dUtils.dSetParams(FEntity, Params);
+  try
+    dUtils.dSetParams(FEntity, Params);
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
 end;
 
 { TdGOpf }
