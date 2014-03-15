@@ -43,6 +43,7 @@ type
     FFileName: TFileName;
     FFilter: TdLogFilter;
     FOnLogging: TdLoggingEvent;
+    FOverwrite: Boolean;
     FStream: TFileStream;
     procedure SetActive(AValue: Boolean);
     procedure SetFileName(AValue: TFileName);
@@ -57,6 +58,7 @@ type
     property Active: Boolean read FActive write SetActive;
     property Filter: TdLogFilter read FFilter write FFilter;
     property FileName: TFileName read FFileName write SetFileName;
+    property Overwrite: Boolean read FOverwrite write FOverwrite;
     property OnLogging: TdLoggingEvent read FOnLogging write FOnLogging;
   end;
 
@@ -429,7 +431,7 @@ begin
     FreeAndNil(FStream);
     F := ChangeFileExt(FFileName, '_' + FormatDateTime('yyyymmdd', Date) +
       ExtractFileExt(FFileName));
-    if FileExists(F) then
+    if (not FOverwrite) and FileExists(F) then
     begin
       FStream := TFileStream.Create(F, fmOpenReadWrite);
       FStream.Seek(FStream.Size, soBeginning);
