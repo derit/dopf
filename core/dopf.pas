@@ -338,7 +338,8 @@ type
     procedure CheckEntity({%H-}AEntity: T3);
     procedure CheckEntities({%H-}AEntities: TEntities);
     procedure CheckTableName;
-    function InternalFind({%H-}AEntity: T3; const ACondition: string): Boolean;
+    function InternalFind({%H-}AEntity: T3; const ACondition: string;
+      const AFillingObjectFilter: Boolean): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
   public
     constructor Create(AConnection: T1;
@@ -353,11 +354,13 @@ type
     procedure SetParams({%H-}AEntity: TObject); virtual;
     procedure GetFields({%H-}AEntity: TObject); virtual;
     function Get(AEntity: T3): Boolean; virtual;
-    function Find(AEntity: T3; const ACondition: string): Boolean; overload; virtual;
-    function Find(AEntity: T3; AEntities: TEntities;
-      const ACondition: string): Boolean; overload; virtual;
-    function Search(AEntity: T3; AEntities: TEntities; AParams: TObject = nil;
-      const ASql: string = ''): Boolean; virtual;
+    function Find(AEntity: T3; const ACondition: string;
+      const AFillingObjectFilter: Boolean = True): Boolean; overload; virtual;
+    function Find(AEntity: T3; AEntities: TEntities; const ACondition: string;
+      const AFillingObjectFilter: Boolean = True): Boolean; overload; virtual;
+    function Search(AEntity: T3; AEntities: TEntities;
+      AParams: TObject = nil; const ASql: string = '';
+      const AFillingObjectFilter: Boolean = True): Boolean; virtual;
     function List(AEntities: TEntities; AParams: TObject = nil;
       const ASql: string = ''): Boolean; virtual;
     procedure Add(AEntity: T3;
@@ -388,13 +391,16 @@ type
       const ATableName: string); reintroduce; override;
     destructor Destroy; override;
     function Get: Boolean; overload;
-    function Find(const ACondition: string): Boolean; overload;
-    function Find(AEntities: TEntities;
-      const ACondition: string): Boolean; overload;
-    function List(AEntities: TEntities; AParams: TObject = nil;
-       const ASql: string = ''): Boolean; override;
-    function Search(AEntities: TEntities; AParams: TObject = nil;
-       const ASql: string = ''): Boolean; overload;
+    function Find(const ACondition: string;
+      const AFillingObjectFilter: Boolean = True): Boolean; overload;
+    function Find(AEntities: TEntities; const ACondition: string;
+      const AFillingObjectFilter: Boolean = True): Boolean; overload;
+    function List(AEntities: TEntities;
+      AParams: TObject = nil; const ASql: string = '';
+      const AFillingObjectFilter: Boolean = True): Boolean; overload;
+    function Search(AEntities: TEntities;
+      AParams: TObject = nil; const ASql: string = '';
+      const AFillingObjectFilter: Boolean = True): Boolean; overload;
     procedure Add(const AIgnorePrimaryKeys: Boolean = True); overload;
     procedure Modify(const AIgnorePrimaryKeys: Boolean = True); overload;
     procedure Remove(const AIgnoreProperties: Boolean = True); overload;
@@ -1679,7 +1685,8 @@ begin
   FQuery.Execute;
 end;
 
-function TdGOpf.InternalFind(AEntity: T3; const ACondition: string): Boolean;
+function TdGOpf.InternalFind(AEntity: T3; const ACondition: string;
+  const AFillingObjectFilter: Boolean): Boolean;
 var
   FS: string = '';
 begin
@@ -1696,7 +1703,7 @@ begin
   SetParams(AEntity);
   FQuery.Open;
   Result := FQuery.Count > 0;
-  if Result then
+  if Result and AFillingObjectFilter then
     GetFields(AEntity);
 end;
 
@@ -1736,27 +1743,28 @@ var
 begin
   CheckEntity(AEntity);
   TDeleteBuilder.MakeParams(FTable, PS, True);
-  Result := InternalFind(AEntity, PS);
+  Result := InternalFind(AEntity, PS, True);
 end;
 
-function TdGOpf.Find(AEntity: T3; const ACondition: string): Boolean;
+function TdGOpf.Find(AEntity: T3; const ACondition: string;
+  const AFillingObjectFilter: Boolean): Boolean;
 begin
   CheckEntity(AEntity);
-  Result := InternalFind(AEntity, ACondition);
+  Result := InternalFind(AEntity, ACondition, AFillingObjectFilter);
 end;
 
 function TdGOpf.Find(AEntity: T3; AEntities: TEntities;
-  const ACondition: string): Boolean;
+  const ACondition: string; const AFillingObjectFilter: Boolean): Boolean;
 begin
   CheckEntity(AEntity);
   CheckEntities(AEntities);
-  Result := InternalFind(AEntity, ACondition);
+  Result := InternalFind(AEntity, ACondition, AFillingObjectFilter);
   if Result then
     PopulateEntities(AEntities);
 end;
 
 function TdGOpf.Search(AEntity: T3; AEntities: TEntities; AParams: TObject;
-  const ASql: string): Boolean;
+  const ASql: string; const AFillingObjectFilter: Boolean): Boolean;
 var
   FS: string = '';
 begin
@@ -1777,7 +1785,8 @@ begin
   Result := FQuery.Count > 0;
   if Result then
   begin
-    GetFields(AEntity);
+    if AFillingObjectFilter then
+      GetFields(AEntity);
     PopulateEntities(AEntities);
   end;
 end;
@@ -1908,29 +1917,31 @@ begin
   Result := inherited Get(FEntity);
 end;
 
-function TdGEntityOpf.Find(const ACondition: string): Boolean;
+function TdGEntityOpf.Find(const ACondition: string;
+  const AFillingObjectFilter: Boolean): Boolean;
 begin
-  Result := inherited Find(FEntity, ACondition);
+  Result := inherited Find(FEntity, ACondition, AFillingObjectFilter);
 end;
 
-function TdGEntityOpf.Find(AEntities: TEntities;
-  const ACondition: string): Boolean;
+function TdGEntityOpf.Find(AEntities: TEntities; const ACondition: string;
+  const AFillingObjectFilter: Boolean): Boolean;
 begin
-  Result := inherited Find(FEntity, AEntities, ACondition);
+  Result := inherited Find(FEntity, AEntities, ACondition, AFillingObjectFilter);
 end;
 
 function TdGEntityOpf.List(AEntities: TEntities; AParams: TObject;
-  const ASql: string): Boolean;
+  const ASql: string; const AFillingObjectFilter: Boolean): Boolean;
 begin
   Result := inherited List(AEntities, AParams, ASql);
-  if Result then
+  if Result and AFillingObjectFilter then
     GetFields(FEntity);
 end;
 
 function TdGEntityOpf.Search(AEntities: TEntities; AParams: TObject;
-  const ASql: string): Boolean;
+  const ASql: string; const AFillingObjectFilter: Boolean): Boolean;
 begin
-  Result := inherited Search(FEntity, AEntities, AParams, ASql);
+  Result := inherited Search(FEntity, AEntities, AParams, ASql,
+    AFillingObjectFilter);
 end;
 
 procedure TdGEntityOpf.Add(const AIgnorePrimaryKeys: Boolean);
