@@ -345,7 +345,7 @@ type
     function InternalFind({%H-}AEntity: T3; const ACondition: string;
       const AFillingObjectFilter: Boolean): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
-    procedure DoUpdating; virtual;
+    procedure DoUpdating(AEntity: T3); virtual;
   public
     constructor Create(AConnection: T1;
       const ATableName: string); reintroduce; virtual;
@@ -1728,10 +1728,10 @@ begin
   end;
 end;
 
-procedure TdGOpf.DoUpdating;
+procedure TdGOpf.DoUpdating(AEntity: T3);
 begin
   if Assigned(FOnUpdating) then
-    FOnUpdating(Self);
+    FOnUpdating(AEntity);
 end;
 
 procedure TdGOpf.SetSql(const ASql: string);
@@ -1836,7 +1836,7 @@ begin
   B := TInsertBuilder.Create(nil);
   try
     FUpdateKind := ukAdd;
-    DoUpdating;
+    DoUpdating(AEntity);
     B.SetTable(Table);
     B.Build(S, AIgnorePrimaryKeys);
     SetSql(S);
@@ -1858,7 +1858,7 @@ begin
   B := TUpdateBuilder.Create(nil);
   try
     FUpdateKind := ukModify;
-    DoUpdating;
+    DoUpdating(AEntity);
     B.SetTable(Table);
     B.Build(S, AIgnorePrimaryKeys);
     SetSql(S);
@@ -1880,7 +1880,7 @@ begin
   B := TDeleteBuilder.Create(nil);
   try
     FUpdateKind := ukRemove;
-    DoUpdating;
+    DoUpdating(AEntity);
     B.SetTable(Table);
     B.Build(S, AIgnoreProperties);
     SetSql(S);
