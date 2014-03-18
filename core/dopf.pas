@@ -333,6 +333,7 @@ type
     TDeleteBuilder = specialize TdGDeleteBuilder<TTable>;
     TEntities = specialize TFPGObjectList<T3>;
   private
+    FOnUpdated: TNotifyEvent;
     FOnUpdating: TNotifyEvent;
     FConnection: T1;
     FQuery: T2;
@@ -346,6 +347,7 @@ type
       const AFillingObjectFilter: Boolean): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
     procedure DoUpdating(AEntity: T3); virtual;
+    procedure DoUpdated(AEntity: T3); virtual;
   public
     constructor Create(AConnection: T1;
       const ATableName: string); reintroduce; virtual;
@@ -383,6 +385,7 @@ type
     property Table: TTable read FTable write FTable;
     property UpdateKind: TdOpfUpdateKind read FUpdateKind;
     property OnUpdating: TNotifyEvent read FOnUpdating write FOnUpdating;
+    property OnUpdated: TNotifyEvent read FOnUpdated write FOnUpdated;
   end;
 
   { TdGEntityOpf }
@@ -1735,6 +1738,12 @@ begin
     FOnUpdating(AEntity);
 end;
 
+procedure TdGOpf.DoUpdated(AEntity: T3);
+begin
+  if Assigned(FOnUpdated) then
+    FOnUpdated(AEntity);
+end;
+
 procedure TdGOpf.SetSql(const ASql: string);
 begin
   FQuery.Close;
@@ -1843,6 +1852,7 @@ begin
     SetSql(S);
     SetParams(AEntity);
     FQuery.Execute;
+    DoUpdated(AEntity);
   finally
     B.Free;
   end;
@@ -1865,6 +1875,7 @@ begin
     SetSql(S);
     SetParams(AEntity);
     FQuery.Execute;
+    DoUpdated(AEntity);
   finally
     B.Free;
   end;
@@ -1887,6 +1898,7 @@ begin
     SetSql(S);
     SetParams(AEntity);
     FQuery.Execute;
+    DoUpdated(AEntity);
   finally
     B.Free;
   end;
