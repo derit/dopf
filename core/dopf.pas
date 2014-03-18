@@ -358,7 +358,8 @@ type
     procedure SetSql(const ASql: string); virtual;
     procedure SetParams({%H-}AEntity: TObject); virtual;
     procedure GetFields({%H-}AEntity: TObject); virtual;
-    function Get(AEntity: T3): Boolean; virtual;
+    function Get(AEntity: T3;
+      const AFillingObjectFilter: Boolean = True): Boolean; virtual;
     function Find(AEntity: T3; const ACondition: string;
       const AFillingObjectFilter: Boolean = True): Boolean; overload; virtual;
     function Find(AEntity: T3; AEntities: TEntities; const ACondition: string;
@@ -397,7 +398,7 @@ type
     constructor Create(AConnection: T1;
       const ATableName: string); reintroduce; override;
     destructor Destroy; override;
-    function Get: Boolean; overload;
+    function Get(const AFillingObjectFilter: Boolean = True): Boolean; overload;
     function Find(const ACondition: string;
       const AFillingObjectFilter: Boolean = True): Boolean; overload;
     function Find(AEntities: TEntities; const ACondition: string;
@@ -1750,13 +1751,13 @@ begin
   dUtils.dGetFields(AEntity, FQuery.Fields);
 end;
 
-function TdGOpf.Get(AEntity: T3): Boolean;
+function TdGOpf.Get(AEntity: T3; const AFillingObjectFilter: Boolean): Boolean;
 var
   PS: string = '';
 begin
   CheckEntity(AEntity);
   TDeleteBuilder.MakeParams(FTable, PS, True);
-  Result := InternalFind(AEntity, PS, True);
+  Result := InternalFind(AEntity, PS, AFillingObjectFilter);
 end;
 
 function TdGOpf.Find(AEntity: T3; const ACondition: string;
@@ -1931,9 +1932,9 @@ begin
   GetFields(FEntity);
 end;
 
-function TdGEntityOpf.Get: Boolean;
+function TdGEntityOpf.Get(const AFillingObjectFilter: Boolean): Boolean;
 begin
-  Result := inherited Get(FEntity);
+  Result := inherited Get(FEntity, AFillingObjectFilter);
 end;
 
 function TdGEntityOpf.Find(const ACondition: string;
