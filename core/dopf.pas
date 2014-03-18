@@ -29,7 +29,7 @@ type
 
   EdOpf = class(EdException);
 
-  TdOpfUpdateKind = (ukNone, ukAdd, ukModify, ukRemove);
+  TdOpfUpdateKind = (ukAdd, ukModify, ukRemove);
 
   TdLogType = (ltTransaction, ltSQL, ltConnection, ltErrors, ltCustom);
 
@@ -1894,20 +1894,12 @@ end;
 
 procedure TdGOpf.Apply;
 begin
-  try
-    FQuery.Apply;
-  finally
-    FUpdateKind := ukNone;
-  end;
+  FQuery.Apply;
 end;
 
 procedure TdGOpf.Discard;
 begin
-  try
-    FQuery.Undo;
-  finally
-    FUpdateKind := ukNone;
-  end;
+  FQuery.Undo;
 end;
 
 { TdGEntityOpf }
