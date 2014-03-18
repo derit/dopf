@@ -29,6 +29,8 @@ type
 
   EdOpf = class(EdException);
 
+  TdOpfUpdateKind = (ukNone, ukAdd, ukModify, ukRemove);
+
   TdLogType = (ltTransaction, ltSQL, ltConnection, ltErrors, ltCustom);
 
   TdLogFilter = set of TdLogType;
@@ -331,9 +333,11 @@ type
     TDeleteBuilder = specialize TdGDeleteBuilder<TTable>;
     TEntities = specialize TFPGObjectList<T3>;
   private
+    FOnUpdating: TNotifyEvent;
     FConnection: T1;
     FQuery: T2;
     FTable: TTable;
+    FUpdateKind: TdOpfUpdateKind;
   protected
     procedure CheckEntity({%H-}AEntity: T3);
     procedure CheckEntities({%H-}AEntities: TEntities);
@@ -341,6 +345,7 @@ type
     function InternalFind({%H-}AEntity: T3; const ACondition: string;
       const AFillingObjectFilter: Boolean): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
+    procedure DoUpdating; virtual;
   public
     constructor Create(AConnection: T1;
       const ATableName: string); reintroduce; virtual;
@@ -375,6 +380,8 @@ type
     property Connection: T1 read FConnection;
     property Query: T2 read FQuery;
     property Table: TTable read FTable write FTable;
+    property UpdateKind: TdOpfUpdateKind read FUpdateKind;
+    property OnUpdating: TNotifyEvent read FOnUpdating write FOnUpdating;
   end;
 
   { TdGEntityOpf }
@@ -1721,6 +1728,12 @@ begin
   end;
 end;
 
+procedure TdGOpf.DoUpdating;
+begin
+  if Assigned(FOnUpdating) then
+    FOnUpdating(Self);
+end;
+
 procedure TdGOpf.SetSql(const ASql: string);
 begin
   FQuery.Close;
@@ -1822,6 +1835,8 @@ begin
   CheckEntity(AEntity);
   B := TInsertBuilder.Create(nil);
   try
+    FUpdateKind := ukAdd;
+    DoUpdating;
     B.SetTable(Table);
     B.Build(S, AIgnorePrimaryKeys);
     SetSql(S);
@@ -1842,6 +1857,8 @@ begin
   CheckEntity(AEntity);
   B := TUpdateBuilder.Create(nil);
   try
+    FUpdateKind := ukModify;
+    DoUpdating;
     B.SetTable(Table);
     B.Build(S, AIgnorePrimaryKeys);
     SetSql(S);
@@ -1862,6 +1879,8 @@ begin
   CheckEntity(AEntity);
   B := TDeleteBuilder.Create(nil);
   try
+    FUpdateKind := ukRemove;
+    DoUpdating;
     B.SetTable(Table);
     B.Build(S, AIgnoreProperties);
     SetSql(S);
@@ -1875,12 +1894,20 @@ end;
 
 procedure TdGOpf.Apply;
 begin
-  FQuery.Apply;
+  try
+    FQuery.Apply;
+  finally
+    FUpdateKind := ukNone;
+  end;
 end;
 
 procedure TdGOpf.Discard;
 begin
-  FQuery.Undo;
+  try
+    FQuery.Undo;
+  finally
+    FUpdateKind := ukNone;
+  end;
 end;
 
 { TdGEntityOpf }
