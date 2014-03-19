@@ -255,6 +255,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure GetFields(AEntity: TObject);
+    procedure SetFields(AEntity: TObject);
+    procedure GetParams(AEntity: TObject);
+    procedure SetParams(AEntity: TObject);
     procedure ApplyUpdates;
     procedure CancelUpdates;
     procedure Apply;
@@ -378,6 +382,8 @@ type
     procedure Remove(AEntity: T3;
       {%H-}const AIgnoreProperties: Boolean = True); virtual;
     procedure Empty; virtual;
+    procedure Commit; virtual;
+    procedure Rollback; virtual;
     procedure Apply; virtual;
     procedure Discard; virtual;
     property Connection: T1 read FConnection;
@@ -1153,6 +1159,62 @@ begin
   inherited Destroy;
 end;
 
+procedure TdGQuery.GetFields(AEntity: TObject);
+begin
+  Connection.Logger.Log(ltCustom, 'Trying Query.GetFields');
+  try
+    dUtils.dGetFields(AEntity, Fields);
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
+end;
+
+procedure TdGQuery.SetFields(AEntity: TObject);
+begin
+  Connection.Logger.Log(ltCustom, 'Trying Query.SetFields');
+  try
+    dUtils.dSetFields(AEntity, Fields);
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
+end;
+
+procedure TdGQuery.GetParams(AEntity: TObject);
+begin
+  Connection.Logger.Log(ltCustom, 'Trying Query.GetParams');
+  try
+    dUtils.dGetParams(AEntity, Params);
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
+end;
+
+procedure TdGQuery.SetParams(AEntity: TObject);
+begin
+  Connection.Logger.Log(ltCustom, 'Trying Query.SetParams');
+  try
+    dUtils.dSetParams(AEntity, Params);
+  except
+    on E: Exception do
+    begin
+      Connection.Logger.Log(ltErrors, E.Message);
+      raise;
+    end;
+  end;
+end;
+
 procedure TdGQuery.CheckBrokerClass;
 begin
   if not T1.InheritsFrom(TdQueryBroker) then
@@ -1582,58 +1644,22 @@ end;
 
 procedure TdGEntityQuery.GetFields;
 begin
-  Connection.Logger.Log(ltCustom, 'Trying EntityQuery.GetFields');
-  try
-    dUtils.dGetFields(FEntity, Fields);
-  except
-    on E: Exception do
-    begin
-      Connection.Logger.Log(ltErrors, E.Message);
-      raise;
-    end;
-  end;
+  inherited GetFields(FEntity);
 end;
 
 procedure TdGEntityQuery.SetFields;
 begin
-  Connection.Logger.Log(ltCustom, 'Trying EntityQuery.SetFields');
-  try
-    dUtils.dSetFields(FEntity, Fields);
-  except
-    on E: Exception do
-    begin
-      Connection.Logger.Log(ltErrors, E.Message);
-      raise;
-    end;
-  end;
+  inherited SetFields(FEntity);
 end;
 
 procedure TdGEntityQuery.GetParams;
 begin
-  Connection.Logger.Log(ltCustom, 'Trying EntityQuery.GetParams');
-  try
-    dUtils.dGetParams(FEntity, Params);
-  except
-    on E: Exception do
-    begin
-      Connection.Logger.Log(ltErrors, E.Message);
-      raise;
-    end;
-  end;
+  inherited GetParams(FEntity);
 end;
 
 procedure TdGEntityQuery.SetParams;
 begin
-  Connection.Logger.Log(ltCustom, 'Trying EntityQuery.SetParams');
-  try
-    dUtils.dSetParams(FEntity, Params);
-  except
-    on E: Exception do
-    begin
-      Connection.Logger.Log(ltErrors, E.Message);
-      raise;
-    end;
-  end;
+  inherited SetParams(FEntity);
 end;
 
 { TdGOpf }
@@ -1904,6 +1930,16 @@ begin
   end;
 end;
 {$NOTES ON}
+
+procedure TdGOpf.Commit;
+begin
+  FQuery.Commit;
+end;
+
+procedure TdGOpf.Rollback;
+begin
+  FQuery.Rollback;
+end;
 
 procedure TdGOpf.Apply;
 begin
