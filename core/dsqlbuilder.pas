@@ -252,8 +252,6 @@ begin
   for I := 0 to Pred(ATable.PropCount) do
   begin
     N := ATable.PropList^[I]^.Name;
-    if ATable.IgnoredFields.IndexOf(N) > -1 then
-      Continue;
     X := ATable.PrimaryKeys.IndexOf(N);
     if X > -1 then
     begin
@@ -262,6 +260,8 @@ begin
       if AIgnorePrimaryKeys then
         Continue;
     end;
+    if ATable.IgnoredFields.IndexOf(N) > -1 then
+      Continue;
     AFields += N + ' = :' + N + ', ';
   end;
   SetLength(AFields, Length(AFields) - 2);
@@ -297,8 +297,6 @@ begin
   for I := 0 to Pred(ATable.PropCount) do
   begin
     N := ATable.PropList^[I]^.Name;
-    if ATable.IgnoredFields.IndexOf(N) > -1 then
-      Continue;
     X := ATable.PrimaryKeys.IndexOf(N);
     if X > -1 then
     begin
@@ -306,8 +304,12 @@ begin
       AParams += P + ' = :' + P + ' and ';
     end
     else
+    begin
+      if ATable.IgnoredFields.IndexOf(N) > -1 then
+        Continue;
       if not AIgnoreProperties then
         AParams += N + ' = :' + N + ' and ';
+    end;
   end;
   SetLength(AParams, Length(AParams) - 5);
   StrLower(PChar(AParams));
