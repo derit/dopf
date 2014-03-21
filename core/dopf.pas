@@ -291,6 +291,7 @@ type
     function IsEmpty: Boolean;
     function GetBookmark: TBookmark;
     procedure GotoBookmark({%H-}ABookmark: TBookmark);
+    procedure AddSql(const ASql: string);
     property Connection: T2 read FConnection write FConnection;
     property Broker: T1 read FBroker write FBroker;
     property SQL: TStrings read GetSQL;
@@ -1616,6 +1617,14 @@ procedure TdGQuery.GotoBookmark(ABookmark: TBookmark);
 begin
   CheckBroker;
   FBroker.GotoBookmark(ABookmark);
+end;
+
+procedure TdGQuery.AddSql(const ASql: string);
+begin
+  CheckBroker;
+  CheckConnection;
+  Connection.Logger.Log(ltSQL, 'Trying add SQL: ' + ASql);
+  FBroker.SQL.Add(ASql);
 end;
 
 { TdGEntityQuery }
