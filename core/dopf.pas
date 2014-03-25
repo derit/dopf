@@ -345,6 +345,8 @@ type
     FTable: TTable;
     FUpdateKind: TdOpfUpdateKind;
   protected
+    function CreateTable: TTable; virtual;
+    procedure FreeTable; virtual;
     procedure CheckEntity({%H-}AEntity: T3);
     procedure CheckEntities({%H-}AEntities: TEntities);
     procedure CheckTableName;
@@ -1678,14 +1680,24 @@ begin
   inherited Create(AConnection);
   FConnection := AConnection;
   FQuery := T2.Create(FConnection);
-  FTable := TTable.Create;
+  FTable := CreateTable;
   FTable.Name := ATableName;
 end;
 
 destructor TdGOpf.Destroy;
 begin
-  FTable.Free;
+  FreeTable;
   inherited Destroy;
+end;
+
+function TdGOpf.CreateTable: TTable;
+begin
+  Result := TTable.Create;
+end;
+
+procedure TdGOpf.FreeTable;
+begin
+  FreeAndNil(FTable);
 end;
 
 procedure TdGOpf.GetFieldNames(out AFieldNames: string);
