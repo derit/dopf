@@ -58,6 +58,7 @@ type
     procedure Log(const AType: TdLogType; AMsg: string);
     procedure LogFmt(const AType: TdLogType; const AMsg: string;
       const AArgs: array of const);
+  published
     property Active: Boolean read FActive write SetActive;
     property Directory: string read FDirectory write FDirectory;
     property Filter: TdLogFilter read FFilter write FFilter;
