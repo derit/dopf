@@ -60,7 +60,7 @@ type
   private
     FTable: T;
   protected
-    procedure CheckTableName;
+    procedure CheckTableName; virtual;
   public
     procedure SetTable(ATable: T);
   end;

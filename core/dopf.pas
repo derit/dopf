@@ -348,9 +348,9 @@ type
   protected
     function CreateTable: TTable; virtual;
     procedure FreeTable; virtual;
-    procedure CheckEntity({%H-}AEntity: T3);
-    procedure CheckEntities({%H-}AEntities: TEntities);
-    procedure CheckTableName;
+    procedure CheckEntity({%H-}AEntity: T3); virtual;
+    procedure CheckEntities({%H-}AEntities: TEntities); virtual;
+    procedure CheckTableName; virtual;
     function InternalFind({%H-}AEntity: T3; const ACondition: string;
       const AFillingObjectFilter: Boolean): Boolean;
     procedure PopulateEntities({%H-}AEntities: TEntities); virtual;
