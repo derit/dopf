@@ -21,6 +21,7 @@ uses
   dClasses, DB, SysUtils, TypInfo;
 
 const
+  dNullParam: string = 'null';
   dNullStr: string = '';
   dNullInt: Integer = 0;
   dNullInt64: Int64 = 0;
@@ -30,7 +31,8 @@ const
   dNullTime: TTime = 0;
   dNullDateTime: TDateTime = 0;
 
-procedure dParameterizeSQL(var ASQL: string; AParams: TParams);
+procedure dParameterizeSQL(var ASql: string; AParams: TParams;
+  const ANulls: Boolean);
 procedure dGetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
 procedure dSetFields(APropList: PPropList; const APropCount: Integer;
   AObject: TObject; AFields: TFields); overload;
@@ -42,7 +44,8 @@ procedure dSetParams(AObject: TObject; AParams: TParams); overload;
 
 implementation
 
-procedure dParameterizeSQL(var ASQL: string; AParams: TParams);
+procedure dParameterizeSQL(var ASql: string; AParams: TParams;
+  const ANulls: Boolean);
 var
   V: string;
   P: TParam;
@@ -53,17 +56,39 @@ begin
   for I := 0 to Pred(AParams.Count) do
   begin
     P := AParams[I];
-    case P.DataType of
-      ftString, ftDate, ftTime, ftDateTime, ftMemo, ftFixedChar, ftGuid:
-        V := QuotedStr(P.AsString);
-      ftFloat, ftCurrency, ftBCD:
-        begin
-          V := FloatToStr(P.AsFloat);
-          V := StringReplace(V, ',', '.', []);
-        end
+    if ANulls then
+      case P.DataType of
+        ftString, ftDate, ftTime, ftDateTime, ftMemo, ftFixedChar, ftGuid:
+          if P.IsNull then
+            V := dNullParam
+          else
+            V := QuotedStr(P.AsString);
+        ftFloat, ftCurrency, ftBCD:
+          if P.IsNull then
+            V := dNullParam
+          else
+          begin
+            V := FloatToStr(P.AsFloat);
+            V := StringReplace(V, ',', '.', []);
+          end;
+      else
+        if P.IsNull then
+          V := dNullParam
+        else
+          V := P.AsString;
+      end
     else
-      V := P.AsString;
-    end;
+      case P.DataType of
+        ftString, ftDate, ftTime, ftDateTime, ftMemo, ftFixedChar, ftGuid:
+          V := QuotedStr(P.AsString);
+        ftFloat, ftCurrency, ftBCD:
+          begin
+            V := FloatToStr(P.AsFloat);
+            V := StringReplace(V, ',', '.', []);
+          end
+      else
+        V := P.AsString;
+      end;
     { TODO: use exactly replace instead of StringReplace. }
     ASQL := StringReplace(ASQL, ':' + P.Name, V, [rfIgnoreCase]);
   end;

@@ -1497,7 +1497,7 @@ begin
   CheckBroker;
   CheckConnection;
   S := Trim(SQL.Text);
-  dParameterizeSQL(S, Params);
+  dUtils.dParameterizeSQL(S, Params, FNulls);
   Connection.Logger.Log(ltSQL, 'Trying Query.Open: ' + S);
   try
     FBroker.Open;
@@ -1559,7 +1559,7 @@ begin
   CheckBroker;
   CheckConnection;
   S := Trim(SQL.Text);
-  dParameterizeSQL(S, Params);
+  dUtils.dParameterizeSQL(S, Params, FNulls);
   Connection.Logger.Log(ltSQL, 'Trying Query.Execute: ' + S);
   try
     FBroker.Execute;
