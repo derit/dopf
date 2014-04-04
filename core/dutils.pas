@@ -35,8 +35,9 @@ procedure dParameterizeSQL(var ASql: string; AParams: TParams;
   const ANulls: Boolean);
 procedure dGetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
 procedure dSetFields(APropList: PPropList; const APropCount: Integer;
-  AObject: TObject; AFields: TFields); overload;
-procedure dSetFields(AObject: TObject; AFields: TFields); overload;
+  AObject: TObject; AFields: TFields; const ANulls: Boolean); overload;
+procedure dSetFields(AObject: TObject; AFields: TFields;
+  const ANulls: Boolean); overload;
 procedure dGetParams(AObject: TObject; AParams: TParams);
 procedure dSetParams(APropList: PPropList; const APropCount: Integer;
   AObject: TObject; AParams: TParams); overload;
@@ -191,7 +192,7 @@ begin
 end;
 
 procedure dSetFields(APropList: PPropList; const APropCount: Integer;
-  AObject: TObject; AFields: TFields);
+  AObject: TObject; AFields: TFields; const ANulls: Boolean);
 var
   F: TField;
   I: Integer;
@@ -207,33 +208,98 @@ begin
     raise EdException.Create('APropList must not be nil.');
   if not Assigned(AFields) then
     raise EdException.Create('AFields must not be nil.');
-  for I := 0 to Pred(APropCount) do
-  begin
-    PI := APropList^[I];
-    F := AFields.FindField(PI^.Name);
-    if not Assigned(F) then
-      Continue;
-    case PI^.PropType^.Kind of
-      tkAString: F.AsString := GetStrProp(AObject, PI);
-      tkChar: PChar(F.AsString)^ := Char(GetOrdProp(AObject, PI));
-      tkInteger: F.AsInteger := GetOrdProp(AObject, PI);
-      tkInt64, tkQWord: F.AsLargeInt := GetInt64Prop(AObject, PI);
-      tkBool: F.AsBoolean := GetOrdProp(AObject, PI) <> 0;
-      tkFloat:
-        case PI^.PropType^.Name of
-          'TDate': F.AsDateTime := Trunc(GetFloatProp(AObject, PI));
-          'TTime': F.AsDateTime := Frac(GetFloatProp(AObject, PI));
-          'TDateTime': F.AsDateTime := GetFloatProp(AObject, PI);
-        else
-          F.AsFloat := GetFloatProp(AObject, PI);
-        end;
-      tkEnumeration: F.AsString := GetEnumProp(AObject, PI);
-      tkSet: F.AsString := GetSetProp(AObject, PI, False);
+  if ANulls then
+    for I := 0 to Pred(APropCount) do
+    begin
+      PI := APropList^[I];
+      F := AFields.FindField(PI^.Name);
+      if not Assigned(F) then
+        Continue;
+      case PI^.PropType^.Kind of
+        tkAString:
+          begin
+            F.AsString := GetStrProp(AObject, PI);
+            if F.AsString = dNullStr then
+              F.Clear;
+          end;
+        tkChar:
+          begin
+            PChar(F.AsString)^ := Char(GetOrdProp(AObject, PI));
+            if F.AsString = dNullStr then
+              F.Clear;
+          end;
+        tkInteger:
+          begin
+            F.AsInteger := GetOrdProp(AObject, PI);
+            if F.AsInteger = dNullInt then
+              F.Clear;
+          end;
+        tkInt64, tkQWord:
+          begin
+            F.AsLargeInt := GetInt64Prop(AObject, PI);
+            if F.AsLargeInt = dNullInt64 then
+              F.Clear;
+          end;
+        tkBool:
+          begin
+            F.AsBoolean := GetOrdProp(AObject, PI) <> 0;
+            if F.AsBoolean = dNullBoolean then
+              F.Clear;
+          end;
+        tkFloat:
+          begin
+            case PI^.PropType^.Name of
+              'TDate': F.AsDateTime := Trunc(GetFloatProp(AObject, PI));
+              'TTime': F.AsDateTime := Frac(GetFloatProp(AObject, PI));
+              'TDateTime': F.AsDateTime := GetFloatProp(AObject, PI);
+            else
+              F.AsFloat := GetFloatProp(AObject, PI);
+            end;
+            if F.AsFloat = dNullFloat then
+              F.Clear;
+          end;
+        tkEnumeration:
+          begin
+            F.AsString := GetEnumProp(AObject, PI);
+            if F.AsString = dNullStr then
+              F.Clear;
+          end;
+        tkSet:
+          begin
+            F.AsString := GetSetProp(AObject, PI, False);
+            if F.AsString = dNullStr then
+              F.Clear;
+          end;
+      end;
+    end
+  else
+    for I := 0 to Pred(APropCount) do
+    begin
+      PI := APropList^[I];
+      F := AFields.FindField(PI^.Name);
+      if not Assigned(F) then
+        Continue;
+      case PI^.PropType^.Kind of
+        tkAString: F.AsString := GetStrProp(AObject, PI);
+        tkChar: PChar(F.AsString)^ := Char(GetOrdProp(AObject, PI));
+        tkInteger: F.AsInteger := GetOrdProp(AObject, PI);
+        tkInt64, tkQWord: F.AsLargeInt := GetInt64Prop(AObject, PI);
+        tkBool: F.AsBoolean := GetOrdProp(AObject, PI) <> 0;
+        tkFloat:
+          case PI^.PropType^.Name of
+            'TDate': F.AsDateTime := Trunc(GetFloatProp(AObject, PI));
+            'TTime': F.AsDateTime := Frac(GetFloatProp(AObject, PI));
+            'TDateTime': F.AsDateTime := GetFloatProp(AObject, PI);
+          else
+            F.AsFloat := GetFloatProp(AObject, PI);
+          end;
+        tkEnumeration: F.AsString := GetEnumProp(AObject, PI);
+        tkSet: F.AsString := GetSetProp(AObject, PI, False);
+      end;
     end;
-  end;
 end;
 
-procedure dSetFields(AObject: TObject; AFields: TFields);
+procedure dSetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
 var
   C: Integer;
   PL: PPropList = nil;
@@ -243,7 +309,7 @@ begin
   C := GetPropList(PTypeInfo(AObject.ClassInfo), PL);
   if Assigned(PL) then
     try
-      dUtils.dSetFields(PL, C, AObject, AFields);
+      dUtils.dSetFields(PL, C, AObject, AFields, ANulls);
     finally
       FreeMem(PL);
     end;

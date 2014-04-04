@@ -1186,7 +1186,7 @@ procedure TdGQuery.SetFields(AEntity: TObject);
 begin
   Connection.Logger.Log(ltCustom, 'Trying Query.SetFields');
   try
-    dUtils.dSetFields(AEntity, Fields);
+    dUtils.dSetFields(AEntity, Fields, FNulls);
   except
     on E: Exception do
     begin
