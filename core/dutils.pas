@@ -38,7 +38,7 @@ procedure dSetFields(APropList: PPropList; const APropCount: Integer;
   AObject: TObject; AFields: TFields; const ANulls: Boolean); overload;
 procedure dSetFields(AObject: TObject; AFields: TFields;
   const ANulls: Boolean); overload;
-procedure dGetParams(AObject: TObject; AParams: TParams);
+procedure dGetParams(AObject: TObject; AParams: TParams; const ANulls: Boolean);
 procedure dSetParams(APropList: PPropList; const APropCount: Integer;
   AObject: TObject; AParams: TParams); overload;
 procedure dSetParams(AObject: TObject; AParams: TParams); overload;
@@ -315,7 +315,7 @@ begin
     end;
 end;
 
-procedure dGetParams(AObject: TObject; AParams: TParams);
+procedure dGetParams(AObject: TObject; AParams: TParams; const ANulls: Boolean);
 var
   I: Integer;
   P: TParam;
@@ -325,26 +325,79 @@ begin
     raise EdException.Create('AObject must not be nil.');
   if not Assigned(AParams) then
     raise EdException.Create('AParams must not be nil.');
-  for I := 0 to Pred(AParams.Count) do
-  begin
-    P := AParams[I];
-    PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), P.Name);
-    if not Assigned(PI) then
-      Continue;
-    case P.DataType of
-      ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
-        ftWideMemo: SetStrProp(AObject, PI, P.AsString);
-      ftSmallInt, ftInteger, ftAutoInc,
-        ftWord: SetOrdProp(AObject, PI, P.AsInteger);
-      ftLargeInt: SetInt64Prop(AObject, PI, P.AsLargeInt);
-      ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, P.AsFloat);
-      ftBoolean: SetOrdProp(AObject, PI, Ord(P.AsBoolean));
-      ftDate: SetFloatProp(AObject, PI, P.AsDate);
-      ftTime: SetFloatProp(AObject, PI, P.AsDateTime);
-      ftDateTime, ftTimeStamp: SetFloatProp(AObject, PI, P.AsDateTime);
-      ftVariant: SetVariantProp(AObject, PI, P.Value);
+  if ANulls then
+    for I := 0 to Pred(AParams.Count) do
+    begin
+      P := AParams[I];
+      PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), P.Name);
+      if not Assigned(PI) then
+        Continue;
+      case P.DataType of
+        ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
+          ftWideMemo:
+          if P.IsNull then
+            SetStrProp(AObject, PI, dNullStr)
+          else
+            SetStrProp(AObject, PI, P.AsString);
+        ftSmallInt, ftInteger, ftAutoInc, ftWord:
+          if P.IsNull then
+            SetOrdProp(AObject, PI, dNullInt)
+          else
+            SetOrdProp(AObject, PI, P.AsInteger);
+        ftLargeInt:
+          if P.IsNull then
+            SetInt64Prop(AObject, PI, dNullInt64)
+          else
+            SetInt64Prop(AObject, PI, P.AsLargeInt);
+        ftFloat, ftCurrency, ftBCD:
+          if P.IsNull then
+            SetFloatProp(AObject, PI, dNullFloat)
+          else
+            SetFloatProp(AObject, PI, P.AsFloat);
+        ftBoolean:
+          if P.IsNull then
+            SetOrdProp(AObject, PI, Ord(dNullBoolean))
+          else
+            SetOrdProp(AObject, PI, Ord(P.AsBoolean));
+        ftDate:
+          if P.IsNull then
+            SetFloatProp(AObject, PI, dNullDate)
+          else
+            SetFloatProp(AObject, PI, P.AsDate);
+        ftTime:
+          if P.IsNull then
+            SetFloatProp(AObject, PI, dNullTime)
+          else
+            SetFloatProp(AObject, PI, P.AsDateTime);
+        ftDateTime, ftTimeStamp:
+          if P.IsNull then
+            SetFloatProp(AObject, PI, dNullDateTime)
+          else
+            SetFloatProp(AObject, PI, P.AsDateTime);
+        ftVariant: SetVariantProp(AObject, PI, P.Value);
+      end;
+    end
+  else
+    for I := 0 to Pred(AParams.Count) do
+    begin
+      P := AParams[I];
+      PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), P.Name);
+      if not Assigned(PI) then
+        Continue;
+      case P.DataType of
+        ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
+          ftWideMemo: SetStrProp(AObject, PI, P.AsString);
+        ftSmallInt, ftInteger, ftAutoInc,
+          ftWord: SetOrdProp(AObject, PI, P.AsInteger);
+        ftLargeInt: SetInt64Prop(AObject, PI, P.AsLargeInt);
+        ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, P.AsFloat);
+        ftBoolean: SetOrdProp(AObject, PI, Ord(P.AsBoolean));
+        ftDate: SetFloatProp(AObject, PI, P.AsDate);
+        ftTime: SetFloatProp(AObject, PI, P.AsDateTime);
+        ftDateTime, ftTimeStamp: SetFloatProp(AObject, PI, P.AsDateTime);
+        ftVariant: SetVariantProp(AObject, PI, P.Value);
+      end;
     end;
-  end;
 end;
 
 procedure dSetParams(APropList: PPropList; const APropCount: Integer;

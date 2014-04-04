@@ -1200,7 +1200,7 @@ procedure TdGQuery.GetParams(AEntity: TObject);
 begin
   Connection.Logger.Log(ltCustom, 'Trying Query.GetParams');
   try
-    dUtils.dGetParams(AEntity, Params);
+    dUtils.dGetParams(AEntity, Params, FNulls);
   except
     on E: Exception do
     begin
