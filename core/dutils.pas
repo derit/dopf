@@ -247,14 +247,27 @@ begin
               F.Clear;
           end;
         tkFloat:
-          begin
-            case PI^.PropType^.Name of
-              'TDate': F.AsDateTime := Trunc(GetFloatProp(AObject, PI));
-              'TTime': F.AsDateTime := Frac(GetFloatProp(AObject, PI));
-              'TDateTime': F.AsDateTime := GetFloatProp(AObject, PI);
-            else
-              F.AsFloat := GetFloatProp(AObject, PI);
-            end;
+          case PI^.PropType^.Name of
+            'TDate':
+              begin
+                F.AsDateTime := Trunc(GetFloatProp(AObject, PI));
+                if F.AsDateTime = dNullDate then
+                  F.Clear;
+              end;
+            'TTime':
+              begin
+                F.AsDateTime := Frac(GetFloatProp(AObject, PI));
+                if F.AsDateTime = dNullTime then
+                  F.Clear;
+              end;
+            'TDateTime':
+              begin
+                F.AsDateTime := GetFloatProp(AObject, PI);
+                if F.AsDateTime = dNullDateTime then
+                  F.Clear;
+              end
+          else
+            F.AsFloat := GetFloatProp(AObject, PI);
             if F.AsFloat = dNullFloat then
               F.Clear;
           end;
