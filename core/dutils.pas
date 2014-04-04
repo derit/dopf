@@ -182,8 +182,9 @@ begin
         ftLargeInt: SetInt64Prop(AObject, PI, F.AsLargeInt);
         ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, F.AsFloat);
         ftBoolean: SetOrdProp(AObject, PI, Ord(F.AsBoolean));
-        ftDate, ftTime, ftDateTime, ftTimeStamp:
-          SetFloatProp(AObject, PI, F.AsDateTime);
+        ftDate: SetFloatProp(AObject, PI, Trunc(F.AsDateTime));
+        ftTime: SetFloatProp(AObject, PI, Frac(F.AsDateTime));
+        ftDateTime, ftTimeStamp: SetFloatProp(AObject, PI, F.AsDateTime);
         ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
       end;
     end;
