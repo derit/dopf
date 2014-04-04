@@ -221,8 +221,9 @@ begin
       tkBool: F.AsBoolean := GetOrdProp(AObject, PI) <> 0;
       tkFloat:
         case PI^.PropType^.Name of
-          'TDate', 'TTime', 'TDateTime':
-            F.AsDateTime := GetFloatProp(AObject, PI);
+          'TDate': F.AsDateTime := Trunc(GetFloatProp(AObject, PI));
+          'TTime': F.AsDateTime := Frac(GetFloatProp(AObject, PI));
+          'TDateTime': F.AsDateTime := GetFloatProp(AObject, PI);
         else
           F.AsFloat := GetFloatProp(AObject, PI);
         end;
@@ -272,8 +273,9 @@ begin
       ftLargeInt: SetInt64Prop(AObject, PI, P.AsLargeInt);
       ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, P.AsFloat);
       ftBoolean: SetOrdProp(AObject, PI, Ord(P.AsBoolean));
-      ftDate, ftTime, ftDateTime, ftTimeStamp:
-        SetFloatProp(AObject, PI, P.AsDateTime);
+      ftDate: SetFloatProp(AObject, PI, P.AsDate);
+      ftTime: SetFloatProp(AObject, PI, P.AsDateTime);
+      ftDateTime, ftTimeStamp: SetFloatProp(AObject, PI, P.AsDateTime);
       ftVariant: SetVariantProp(AObject, PI, P.Value);
     end;
   end;
