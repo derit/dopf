@@ -20,8 +20,18 @@ interface
 uses
   dClasses, DB, SysUtils, TypInfo;
 
+const
+  dNullStr: string = '';
+  dNullInt: Integer = 0;
+  dNullInt64: Int64 = 0;
+  dNullFloat: Double = 0;
+  dNullBoolean: Boolean = False;
+  dNullDate: TDate = 0;
+  dNullTime: TTime = 0;
+  dNullDateTime: TDateTime = 0;
+
 procedure dParameterizeSQL(var ASQL: string; AParams: TParams);
-procedure dGetFields(AObject: TObject; AFields: TFields);
+procedure dGetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
 procedure dSetFields(APropList: PPropList; const APropCount: Integer;
   AObject: TObject; AFields: TFields); overload;
 procedure dSetFields(AObject: TObject; AFields: TFields); overload;
@@ -59,7 +69,7 @@ begin
   end;
 end;
 
-procedure dGetFields(AObject: TObject; AFields: TFields);
+procedure dGetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
 var
   I: Integer;
   F: TField;
@@ -75,18 +85,64 @@ begin
     PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), F.FieldName);
     if not Assigned(PI) then
       Continue;
-    case F.DataType of
-      ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
-        ftWideMemo: SetStrProp(AObject, PI, F.AsString);
-      ftSmallInt, ftInteger, ftAutoInc,
-        ftWord: SetOrdProp(AObject, PI, F.AsInteger);
-      ftLargeInt: SetInt64Prop(AObject, PI, F.AsLargeInt);
-      ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, F.AsFloat);
-      ftBoolean: SetOrdProp(AObject, PI, Ord(F.AsBoolean));
-      ftDate, ftTime, ftDateTime, ftTimeStamp:
-        SetFloatProp(AObject, PI, F.AsDateTime);
-      ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
-    end;
+    if ANulls then
+      case F.DataType of
+        ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo,
+          ftGuid, ftWideMemo:
+          if F.IsNull then
+            SetStrProp(AObject, PI, dNullStr)
+          else
+            SetStrProp(AObject, PI, F.AsString);
+        ftSmallInt, ftInteger, ftAutoInc, ftWord:
+          if F.IsNull then
+            SetOrdProp(AObject, PI, dNullInt)
+          else
+            SetOrdProp(AObject, PI, F.AsInteger);
+        ftLargeInt:
+          if F.IsNull then
+            SetInt64Prop(AObject, PI, dNullInt64)
+          else
+            SetInt64Prop(AObject, PI, F.AsLargeInt);
+        ftFloat, ftCurrency, ftBCD:
+          if F.IsNull then
+            SetFloatProp(AObject, PI, dNullFloat)
+          else
+            SetFloatProp(AObject, PI, F.AsFloat);
+        ftBoolean:
+          if F.IsNull then
+            SetOrdProp(AObject, PI, Ord(dNullBoolean))
+          else
+            SetOrdProp(AObject, PI, Ord(F.AsBoolean));
+        ftDate:
+          if F.IsNull then
+            SetFloatProp(AObject, PI, dNullDate)
+          else
+            SetFloatProp(AObject, PI, Trunc(F.AsDateTime));
+        ftTime:
+          if F.IsNull then
+            SetFloatProp(AObject, PI, dNullTime)
+          else
+            SetFloatProp(AObject, PI, Frac(F.AsDateTime));
+        ftDateTime, ftTimeStamp:
+          if F.IsNull then
+            SetFloatProp(AObject, PI, dNullDateTime)
+          else
+            SetFloatProp(AObject, PI, F.AsDateTime);
+        ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
+      end
+    else
+      case F.DataType of
+        ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
+          ftWideMemo: SetStrProp(AObject, PI, F.AsString);
+        ftSmallInt, ftInteger, ftAutoInc,
+          ftWord: SetOrdProp(AObject, PI, F.AsInteger);
+        ftLargeInt: SetInt64Prop(AObject, PI, F.AsLargeInt);
+        ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, F.AsFloat);
+        ftBoolean: SetOrdProp(AObject, PI, Ord(F.AsBoolean));
+        ftDate, ftTime, ftDateTime, ftTimeStamp:
+          SetFloatProp(AObject, PI, F.AsDateTime);
+        ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
+      end;
   end;
 end;
 

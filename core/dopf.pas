@@ -234,6 +234,7 @@ type
   private
     FBroker: T1;
     FConnection: T2;
+    FNulls: Boolean;
     function GetActive: Boolean;
     function GetBOF: Boolean;
     function GetDataSet: TDataSet;
@@ -295,6 +296,7 @@ type
     procedure AddSql(const ASql: string);
     property Connection: T2 read FConnection write FConnection;
     property Broker: T1 read FBroker write FBroker;
+    property Nulls: Boolean read FNulls write FNulls;
     property SQL: TStrings read GetSQL;
     property Fields: TFields read GetFields;
     property FieldDefs: TFieldDefs read GetFieldDefs;
@@ -345,6 +347,8 @@ type
     FQuery: T2;
     FTable: TTable;
     FUpdateKind: TdOpfUpdateKind;
+    function GetNulls: Boolean;
+    procedure SetNulls(const AValue: Boolean);
   protected
     function CreateTable: TTable; virtual;
     procedure FreeTable; virtual;
@@ -393,6 +397,7 @@ type
     property Connection: T1 read FConnection;
     property Query: T2 read FQuery;
     property Table: TTable read FTable write FTable;
+    property Nulls: Boolean read GetNulls write SetNulls;
     property UpdateKind: TdOpfUpdateKind read FUpdateKind;
     property OnUpdating: TNotifyEvent read FOnUpdating write FOnUpdating;
     property OnUpdated: TNotifyEvent read FOnUpdated write FOnUpdated;
@@ -1167,7 +1172,7 @@ procedure TdGQuery.GetFields(AEntity: TObject);
 begin
   Connection.Logger.Log(ltCustom, 'Trying Query.GetFields');
   try
-    dUtils.dGetFields(AEntity, Fields);
+    dUtils.dGetFields(AEntity, Fields, FNulls);
   except
     on E: Exception do
     begin
@@ -1691,6 +1696,16 @@ begin
   inherited Destroy;
 end;
 
+function TdGOpf.GetNulls: Boolean;
+begin
+  Result := FQuery.Nulls;
+end;
+
+procedure TdGOpf.SetNulls(const AValue: Boolean);
+begin
+  FQuery.Nulls := AValue;
+end;
+
 function TdGOpf.CreateTable: TTable;
 begin
   Result := TTable.Create;
@@ -1805,7 +1820,7 @@ end;
 
 procedure TdGOpf.GetFields(AEntity: TObject);
 begin
-  dUtils.dGetFields(AEntity, FQuery.Fields);
+  dUtils.dGetFields(AEntity, FQuery.Fields, FQuery.Nulls);
 end;
 
 function TdGOpf.Get(AEntity: T3; const AFillingObjectFilter: Boolean): Boolean;
