@@ -76,8 +76,8 @@ begin
     if not Assigned(PI) then
       Continue;
     case F.DataType of
-      ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftWideMemo,
-        ftGuid: SetStrProp(AObject, PI, F.AsString);
+      ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
+        ftWideMemo: SetStrProp(AObject, PI, F.AsString);
       ftSmallInt, ftInteger, ftAutoInc,
         ftWord: SetOrdProp(AObject, PI, F.AsInteger);
       ftLargeInt: SetInt64Prop(AObject, PI, F.AsLargeInt);
