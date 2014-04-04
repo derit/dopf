@@ -1214,7 +1214,7 @@ procedure TdGQuery.SetParams(AEntity: TObject);
 begin
   Connection.Logger.Log(ltCustom, 'Trying Query.SetParams');
   try
-    dUtils.dSetParams(AEntity, Params);
+    dUtils.dSetParams(AEntity, Params, FNulls);
   except
     on E: Exception do
     begin
@@ -1815,7 +1815,8 @@ end;
 
 procedure TdGOpf.SetParams(AEntity: TObject);
 begin
-  dUtils.dSetParams(FTable.PropList, FTable.PropCount, AEntity, FQuery.Params);
+  dUtils.dSetParams(FTable.PropList, FTable.PropCount, AEntity, FQuery.Params,
+    FQuery.Nulls);
 end;
 
 procedure TdGOpf.GetFields(AEntity: TObject);
@@ -1866,7 +1867,7 @@ begin
     SetSql(ASql);
   SetParams(AEntity);
   if Assigned(AParams) then
-    dUtils.dSetParams(AParams, FQuery.Params);
+    dUtils.dSetParams(AParams, FQuery.Params, FQuery.Nulls);
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
@@ -1892,7 +1893,7 @@ begin
   else
     SetSql(ASql);
   if Assigned(AParams) then
-    dUtils.dSetParams(AParams, FQuery.Params);
+    dUtils.dSetParams(AParams, FQuery.Params, FQuery.Nulls);
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
