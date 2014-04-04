@@ -32,17 +32,19 @@ const
   dNullDateTime: TDateTime = 0;
 
 procedure dParameterizeSQL(var ASql: string; AParams: TParams;
-  const ANulls: Boolean);
-procedure dGetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
+  const ANulls: Boolean = False);
+procedure dGetFields(AObject: TObject; AFields: TFields;
+  const ANulls: Boolean = False);
 procedure dSetFields(APropList: PPropList; const APropCount: Integer;
-  AObject: TObject; AFields: TFields; const ANulls: Boolean); overload;
+  AObject: TObject; AFields: TFields; const ANulls: Boolean = False); overload;
 procedure dSetFields(AObject: TObject; AFields: TFields;
-  const ANulls: Boolean); overload;
-procedure dGetParams(AObject: TObject; AParams: TParams; const ANulls: Boolean);
+  const ANulls: Boolean = False); overload;
+procedure dGetParams(AObject: TObject; AParams: TParams;
+  const ANulls: Boolean = False);
 procedure dSetParams(APropList: PPropList; const APropCount: Integer;
-  AObject: TObject; AParams: TParams; const ANulls: Boolean); overload;
+  AObject: TObject; AParams: TParams; const ANulls: Boolean = False); overload;
 procedure dSetParams(AObject: TObject; AParams: TParams;
-  const ANulls: Boolean); overload;
+  const ANulls: Boolean = False); overload;
 
 implementation
 
