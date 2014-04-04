@@ -35,11 +35,11 @@ begin
     qry.SQL.Text := 'insert into person (id, name) values (:id, :name)';
     per.Id := 1;
     per.Name := 'Silvio';
-    dUtils.dSetParams(per, qry.Params);
+    dUtils.dSetParams(per, qry.Params, True);
     qry.Execute;
     per.Id := 2;
     per.Name := 'Waldir';
-    dUtils.dSetParams(per, qry.Params);
+    dUtils.dSetParams(per, qry.Params, True);
     qry.Execute;
     qry.Apply;
 
@@ -48,7 +48,7 @@ begin
     qry.First;
     while not qry.EOF do
     begin
-      dUtils.dGetFields(per, qry.Fields);
+      dUtils.dGetFields(per, qry.Fields, True);
       WriteLn('Record: ', per.id, ', ', per.Name);
       qry.Next;
     end;
@@ -59,7 +59,7 @@ begin
     begin
       per.Id := 0;
       per.Name := '';
-      dUtils.dGetFields(per, qry.Fields);
+      dUtils.dGetFields(per, qry.Fields, True);
     end;
     e := Now;
     WriteLn('Performance: ', FormatDateTime('hh:nn:ss.zzz', e - b));
