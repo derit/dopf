@@ -50,13 +50,20 @@ var
   V: string;
   P: TParam;
   I: Integer;
+
+  procedure Replace;
+  begin
+    { TODO: use exactly replace instead of StringReplace. }
+    ASql := StringReplace(ASql, ':' + P.Name, V, [rfIgnoreCase]);
+  end;
+
 begin
   if not Assigned(AParams) then
     raise EdException.Create('AParams must not be nil.');
-  for I := 0 to Pred(AParams.Count) do
-  begin
-    P := AParams[I];
-    if ANulls then
+  if ANulls then
+    for I := 0 to Pred(AParams.Count) do
+    begin
+      P := AParams[I];
       case P.DataType of
         ftString, ftDate, ftTime, ftDateTime, ftMemo, ftFixedChar, ftGuid:
           if P.IsNull then
@@ -76,8 +83,13 @@ begin
           V := dNullParam
         else
           V := P.AsString;
-      end
-    else
+      end;
+      Replace;
+    end
+  else
+    for I := 0 to Pred(AParams.Count) do
+    begin
+      P := AParams[I];
       case P.DataType of
         ftString, ftDate, ftTime, ftDateTime, ftMemo, ftFixedChar, ftGuid:
           V := QuotedStr(P.AsString);
@@ -89,9 +101,8 @@ begin
       else
         V := P.AsString;
       end;
-    { TODO: use exactly replace instead of StringReplace. }
-    ASQL := StringReplace(ASQL, ':' + P.Name, V, [rfIgnoreCase]);
-  end;
+      Replace;
+    end;
 end;
 
 procedure dGetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
@@ -104,13 +115,13 @@ begin
     raise EdException.Create('AObject must not be nil.');
   if not Assigned(AFields) then
     raise EdException.Create('AFields must not be nil.');
-  for I := 0 to Pred(AFields.Count) do
-  begin
-    F := AFields[I];
-    PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), F.FieldName);
-    if not Assigned(PI) then
-      Continue;
-    if ANulls then
+  if ANulls then
+    for I := 0 to Pred(AFields.Count) do
+    begin
+      F := AFields[I];
+      PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), F.FieldName);
+      if not Assigned(PI) then
+        Continue;
       case F.DataType of
         ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo,
           ftGuid, ftWideMemo:
@@ -154,8 +165,15 @@ begin
           else
             SetFloatProp(AObject, PI, F.AsDateTime);
         ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
-      end
-    else
+      end;
+    end
+  else
+    for I := 0 to Pred(AFields.Count) do
+    begin
+      F := AFields[I];
+      PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), F.FieldName);
+      if not Assigned(PI) then
+        Continue;
       case F.DataType of
         ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
           ftWideMemo: SetStrProp(AObject, PI, F.AsString);
@@ -168,7 +186,7 @@ begin
           SetFloatProp(AObject, PI, F.AsDateTime);
         ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
       end;
-  end;
+    end;
 end;
 
 procedure dSetFields(APropList: PPropList; const APropCount: Integer;
