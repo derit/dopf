@@ -23,6 +23,7 @@ uses
 const
   dNullParam: string = 'null';
   dNullStr: string = '';
+  dNullChar: Char = #0;
   dNullInt: Integer = 0;
   dNullInt64: Int64 = 0;
   dNullFloat: Double = 0;
@@ -126,49 +127,65 @@ begin
       PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), F.FieldName);
       if not Assigned(PI) then
         Continue;
-      case F.DataType of
-        ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo,
-          ftGuid, ftWideMemo:
+      case PI^.PropType^.Kind of
+        tkAString:
           if F.IsNull then
             SetStrProp(AObject, PI, dNullStr)
           else
             SetStrProp(AObject, PI, F.AsString);
-        ftSmallInt, ftInteger, ftAutoInc, ftWord:
+        tkChar:
+          if F.IsNull then
+            SetOrdProp(AObject, PI, Ord(dNullChar))
+          else
+            SetOrdProp(AObject, PI, Ord(PChar(F.AsString)^));
+        tkInteger:
           if F.IsNull then
             SetOrdProp(AObject, PI, dNullInt)
           else
             SetOrdProp(AObject, PI, F.AsInteger);
-        ftLargeInt:
+        tkInt64, tkQWord:
           if F.IsNull then
             SetInt64Prop(AObject, PI, dNullInt64)
           else
             SetInt64Prop(AObject, PI, F.AsLargeInt);
-        ftFloat, ftCurrency, ftBCD:
-          if F.IsNull then
-            SetFloatProp(AObject, PI, dNullFloat)
-          else
-            SetFloatProp(AObject, PI, F.AsFloat);
-        ftBoolean:
+        tkBool:
           if F.IsNull then
             SetOrdProp(AObject, PI, Ord(dNullBoolean))
           else
             SetOrdProp(AObject, PI, Ord(F.AsBoolean));
-        ftDate:
-          if F.IsNull then
-            SetFloatProp(AObject, PI, dNullDate)
+        tkFloat:
+          case PI^.PropType^.Name of
+            'TDate':
+              if F.IsNull then
+                SetFloatProp(AObject, PI, dNullDate)
+              else
+                SetFloatProp(AObject, PI, Trunc(F.AsDateTime));
+            'TTime':
+              if F.IsNull then
+                SetFloatProp(AObject, PI, dNullTime)
+              else
+                SetFloatProp(AObject, PI, Frac(F.AsDateTime));
+            'TDateTime':
+              if F.IsNull then
+                SetFloatProp(AObject, PI, dNullDateTime)
+              else
+                SetFloatProp(AObject, PI, F.AsDateTime)
           else
-            SetFloatProp(AObject, PI, Trunc(F.AsDateTime));
-        ftTime:
+            if F.IsNull then
+              SetFloatProp(AObject, PI, dNullFloat)
+            else
+              SetFloatProp(AObject, PI, F.AsFloat);
+          end;
+        tkEnumeration:
           if F.IsNull then
-            SetFloatProp(AObject, PI, dNullTime)
+            SetEnumProp(AObject, PI, dNullStr)
           else
-            SetFloatProp(AObject, PI, Frac(F.AsDateTime));
-        ftDateTime, ftTimeStamp:
+            SetEnumProp(AObject, PI, F.AsString);
+        tkSet:
           if F.IsNull then
-            SetFloatProp(AObject, PI, dNullDateTime)
+            SetSetProp(AObject, PI, dNullStr)
           else
-            SetFloatProp(AObject, PI, F.AsDateTime);
-        ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
+            SetSetProp(AObject, PI, F.AsString);
       end;
     end
   else
@@ -178,18 +195,22 @@ begin
       PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), F.FieldName);
       if not Assigned(PI) then
         Continue;
-      case F.DataType of
-        ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
-          ftWideMemo: SetStrProp(AObject, PI, F.AsString);
-        ftSmallInt, ftInteger, ftAutoInc,
-          ftWord: SetOrdProp(AObject, PI, F.AsInteger);
-        ftLargeInt: SetInt64Prop(AObject, PI, F.AsLargeInt);
-        ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, F.AsFloat);
-        ftBoolean: SetOrdProp(AObject, PI, Ord(F.AsBoolean));
-        ftDate: SetFloatProp(AObject, PI, Trunc(F.AsDateTime));
-        ftTime: SetFloatProp(AObject, PI, Frac(F.AsDateTime));
-        ftDateTime, ftTimeStamp: SetFloatProp(AObject, PI, F.AsDateTime);
-        ftVariant: SetVariantProp(AObject, PI, F.AsVariant);
+      case PI^.PropType^.Kind of
+        tkAString: SetStrProp(AObject, PI, F.AsString);
+        tkChar: SetOrdProp(AObject, PI, Ord(PChar(F.AsString)^));
+        tkInteger: SetOrdProp(AObject, PI, F.AsInteger);
+        tkInt64, tkQWord: SetInt64Prop(AObject, PI, F.AsLargeInt);
+        tkBool: SetOrdProp(AObject, PI, Ord(F.AsBoolean));
+        tkFloat:
+          case PI^.PropType^.Name of
+            'TDate': SetFloatProp(AObject, PI, Trunc(F.AsDateTime));
+            'TTime': SetFloatProp(AObject, PI, Frac(F.AsDateTime));
+            'TDateTime': SetFloatProp(AObject, PI, F.AsDateTime)
+          else
+            SetFloatProp(AObject, PI, F.AsFloat);
+          end;
+        tkEnumeration: SetEnumProp(AObject, PI, F.AsString);
+        tkSet: SetSetProp(AObject, PI, F.AsString);
       end;
     end;
 end;
@@ -228,7 +249,7 @@ begin
         tkChar:
           begin
             F.AsString := Char(GetOrdProp(AObject, PI));
-            if F.AsString = dNullStr then
+            if F.AsString = dNullChar then
               F.Clear;
           end;
         tkInteger:
@@ -348,49 +369,65 @@ begin
       PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), P.Name);
       if not Assigned(PI) then
         Continue;
-      case P.DataType of
-        ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
-          ftWideMemo:
+      case PI^.PropType^.Kind of
+        tkAString:
           if P.IsNull then
             SetStrProp(AObject, PI, dNullStr)
           else
             SetStrProp(AObject, PI, P.AsString);
-        ftSmallInt, ftInteger, ftAutoInc, ftWord:
+        tkChar:
+          if P.IsNull then
+            SetOrdProp(AObject, PI, Ord(dNullChar))
+          else
+            SetOrdProp(AObject, PI, Ord(PChar(P.AsString)^));
+        tkInteger:
           if P.IsNull then
             SetOrdProp(AObject, PI, dNullInt)
           else
             SetOrdProp(AObject, PI, P.AsInteger);
-        ftLargeInt:
+        tkInt64, tkQWord:
           if P.IsNull then
             SetInt64Prop(AObject, PI, dNullInt64)
           else
             SetInt64Prop(AObject, PI, P.AsLargeInt);
-        ftFloat, ftCurrency, ftBCD:
-          if P.IsNull then
-            SetFloatProp(AObject, PI, dNullFloat)
-          else
-            SetFloatProp(AObject, PI, P.AsFloat);
-        ftBoolean:
+        tkBool:
           if P.IsNull then
             SetOrdProp(AObject, PI, Ord(dNullBoolean))
           else
             SetOrdProp(AObject, PI, Ord(P.AsBoolean));
-        ftDate:
-          if P.IsNull then
-            SetFloatProp(AObject, PI, dNullDate)
+        tkFloat:
+          case PI^.PropType^.Name of
+            'TDate':
+              if P.IsNull then
+                SetFloatProp(AObject, PI, dNullDate)
+              else
+                SetFloatProp(AObject, PI, P.AsDate);
+            'TTime':
+              if P.IsNull then
+                SetFloatProp(AObject, PI, dNullTime)
+              else
+                SetFloatProp(AObject, PI, P.AsTime);
+            'TDateTime':
+              if P.IsNull then
+                SetFloatProp(AObject, PI, dNullDateTime)
+              else
+                SetFloatProp(AObject, PI, P.AsDateTime)
           else
-            SetFloatProp(AObject, PI, P.AsDate);
-        ftTime:
+            if P.IsNull then
+              SetFloatProp(AObject, PI, dNullFloat)
+            else
+              SetFloatProp(AObject, PI, P.AsFloat);
+          end;
+        tkEnumeration:
           if P.IsNull then
-            SetFloatProp(AObject, PI, dNullTime)
+            SetEnumProp(AObject, PI, dNullStr)
           else
-            SetFloatProp(AObject, PI, P.AsDateTime);
-        ftDateTime, ftTimeStamp:
+            SetEnumProp(AObject, PI, P.AsString);
+        tkSet:
           if P.IsNull then
-            SetFloatProp(AObject, PI, dNullDateTime)
+            SetSetProp(AObject, PI, dNullStr)
           else
-            SetFloatProp(AObject, PI, P.AsDateTime);
-        ftVariant: SetVariantProp(AObject, PI, P.Value);
+            SetSetProp(AObject, PI, P.AsString);
       end;
     end
   else
@@ -400,18 +437,22 @@ begin
       PI := GetPropInfo(PTypeInfo(AObject.ClassInfo), P.Name);
       if not Assigned(PI) then
         Continue;
-      case P.DataType of
-        ftFixedWideChar, ftWideString, ftFixedChar, ftString, ftMemo, ftGuid,
-          ftWideMemo: SetStrProp(AObject, PI, P.AsString);
-        ftSmallInt, ftInteger, ftAutoInc,
-          ftWord: SetOrdProp(AObject, PI, P.AsInteger);
-        ftLargeInt: SetInt64Prop(AObject, PI, P.AsLargeInt);
-        ftFloat, ftCurrency, ftBCD: SetFloatProp(AObject, PI, P.AsFloat);
-        ftBoolean: SetOrdProp(AObject, PI, Ord(P.AsBoolean));
-        ftDate: SetFloatProp(AObject, PI, P.AsDate);
-        ftTime: SetFloatProp(AObject, PI, P.AsDateTime);
-        ftDateTime, ftTimeStamp: SetFloatProp(AObject, PI, P.AsDateTime);
-        ftVariant: SetVariantProp(AObject, PI, P.Value);
+      case PI^.PropType^.Kind of
+        tkAString: SetStrProp(AObject, PI, P.AsString);
+        tkChar: SetOrdProp(AObject, PI, Ord(PChar(P.AsString)^));
+        tkInteger: SetOrdProp(AObject, PI, P.AsInteger);
+        tkInt64, tkQWord: SetInt64Prop(AObject, PI, P.AsLargeInt);
+        tkBool: SetOrdProp(AObject, PI, Ord(P.AsBoolean));
+        tkFloat:
+          case PI^.PropType^.Name of
+            'TDate': SetFloatProp(AObject, PI, P.AsDate);
+            'TTime': SetFloatProp(AObject, PI, P.AsTime);
+            'TDateTime': SetFloatProp(AObject, PI, P.AsDateTime)
+          else
+            SetFloatProp(AObject, PI, P.AsFloat);
+          end;
+        tkEnumeration: SetEnumProp(AObject, PI, P.AsString);
+        tkSet: SetSetProp(AObject, PI, P.AsString);
       end;
     end;
 end;
@@ -450,7 +491,7 @@ begin
         tkChar:
           begin
             P.AsString := Char(GetOrdProp(AObject, PI));
-            if P.AsString = dNullStr then
+            if P.AsString = dNullChar then
               P.Clear;
           end;
         tkInteger:
