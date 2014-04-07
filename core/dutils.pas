@@ -227,7 +227,7 @@ begin
           end;
         tkChar:
           begin
-            PChar(F.AsString)^ := Char(GetOrdProp(AObject, PI));
+            F.AsString := Char(GetOrdProp(AObject, PI));
             if F.AsString = dNullStr then
               F.Clear;
           end;
@@ -297,7 +297,7 @@ begin
         Continue;
       case PI^.PropType^.Kind of
         tkAString: F.AsString := GetStrProp(AObject, PI);
-        tkChar: PChar(F.AsString)^ := Char(GetOrdProp(AObject, PI));
+        tkChar: F.AsString := Char(GetOrdProp(AObject, PI));
         tkInteger: F.AsInteger := GetOrdProp(AObject, PI);
         tkInt64, tkQWord: F.AsLargeInt := GetInt64Prop(AObject, PI);
         tkBool: F.AsBoolean := GetOrdProp(AObject, PI) <> 0;
@@ -449,7 +449,7 @@ begin
           end;
         tkChar:
           begin
-            PChar(P.AsString)^ := Char(GetOrdProp(AObject, PI));
+            P.AsString := Char(GetOrdProp(AObject, PI));
             if P.AsString = dNullStr then
               P.Clear;
           end;
@@ -519,7 +519,7 @@ begin
         Continue;
       case PI^.PropType^.Kind of
         tkAString: P.AsString := GetStrProp(AObject, PI);
-        tkChar: PChar(P.AsString)^ := Char(GetOrdProp(AObject, PI));
+        tkChar: P.AsString := Char(GetOrdProp(AObject, PI));
         tkInteger: P.AsInteger := GetOrdProp(AObject, PI);
         tkInt64, tkQWord: P.AsLargeInt := GetInt64Prop(AObject, PI);
         tkBool: P.AsBoolean := GetOrdProp(AObject, PI) <> 0;
