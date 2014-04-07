@@ -31,6 +31,8 @@ const
   dNullDate: TDate = 0;
   dNullTime: TTime = 0;
   dNullDateTime: TDateTime = 0;
+  dNullEnum: string = '';
+  dNullSet: string = '';
 
 procedure dParameterizeSQL(var ASql: string; AParams: TParams;
   const ANulls: Boolean = False);
@@ -178,12 +180,12 @@ begin
           end;
         tkEnumeration:
           if F.IsNull then
-            SetEnumProp(AObject, PI, dNullStr)
+            SetEnumProp(AObject, PI, dNullEnum)
           else
             SetEnumProp(AObject, PI, F.AsString);
         tkSet:
           if F.IsNull then
-            SetSetProp(AObject, PI, dNullStr)
+            SetSetProp(AObject, PI, dNullSet)
           else
             SetSetProp(AObject, PI, F.AsString);
       end;
@@ -298,13 +300,13 @@ begin
         tkEnumeration:
           begin
             F.AsString := GetEnumProp(AObject, PI);
-            if F.AsString = dNullStr then
+            if F.AsString = dNullEnum then
               F.Clear;
           end;
         tkSet:
           begin
             F.AsString := GetSetProp(AObject, PI, False);
-            if F.AsString = dNullStr then
+            if F.AsString = dNullSet then
               F.Clear;
           end;
       end;
@@ -420,12 +422,12 @@ begin
           end;
         tkEnumeration:
           if P.IsNull then
-            SetEnumProp(AObject, PI, dNullStr)
+            SetEnumProp(AObject, PI, dNullEnum)
           else
             SetEnumProp(AObject, PI, P.AsString);
         tkSet:
           if P.IsNull then
-            SetSetProp(AObject, PI, dNullStr)
+            SetSetProp(AObject, PI, dNullSet)
           else
             SetSetProp(AObject, PI, P.AsString);
       end;
@@ -540,13 +542,13 @@ begin
         tkEnumeration:
           begin
             P.AsString := GetEnumProp(AObject, PI);
-            if P.AsString = dNullStr then
+            if P.AsString = dNullEnum then
               P.Clear;
           end;
         tkSet:
           begin
             P.AsString := GetSetProp(AObject, PI, False);
-            if P.AsString = dNullStr then
+            if P.AsString = dNullSet then
               P.Clear;
           end;
       end;
