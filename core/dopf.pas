@@ -457,14 +457,18 @@ end;
 
 procedure TdLogger.SetFileName(AValue: TFileName);
 var
+  D: string;
   F: TFileName;
 begin
   if FActive and (Trim(AValue) <> '') and (AValue <> FFileName) then
   begin
     FFileName := AValue;
     FreeAndNil(FStream);
-    F := IncludeTrailingPathDelimiter(FDirectory) +
-      ChangeFileExt(FFileName, '_' + FormatDateTime('yyyymmdd', Date) +
+    if FDirectory <> '' then
+      D := IncludeTrailingPathDelimiter(FDirectory)
+    else
+      D := '';
+    F := D + ChangeFileExt(FFileName, '_' + FormatDateTime('yyyymmdd', Date) +
       ExtractFileExt(FFileName));
     if (not FOverwrite) and FileExists(F) then
     begin
