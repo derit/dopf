@@ -6,7 +6,7 @@ uses
 {$IFDEF DEBUG}
   heaptrc,
 {$ENDIF}
-  dUtils, dSQLdbBroker, person, sysutils, pqconnection;
+  dUtils, dSQLdbBroker, person, sysutils, sqlite3conn;
 
 var
   i: Integer;
@@ -21,11 +21,8 @@ begin
   try
     con.Logger.Active := True;
     con.Logger.FileName := 'OUTPUT.LOG';
-    con.Driver := 'postgresql';
-    con.Host := '127.0.0.1';
-    con.Database := 'postgres';
-    con.User := 'postgres';
-    con.Password := 'postgres';
+    con.Driver := 'sqlite3';
+    con.Database := '..\data.sqlite3';
     con.Connect;
 
     qry.SQL.Text := 'delete from person';

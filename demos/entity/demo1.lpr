@@ -3,7 +3,7 @@ program demo1;
 {$mode objfpc}{$H+}
 
 uses
-  dSQLdbBroker, person, sysutils, pqconnection;
+  dSQLdbBroker, person, sysutils, sqlite3conn;
 
 type
   Tcon = class(TdSQLdbConnector)
@@ -21,11 +21,8 @@ begin
   try
     con.Logger.Active := True;
     con.Logger.FileName := 'OUTPUT.LOG';
-    con.Driver := 'postgresql';
-    con.Host := '127.0.0.1';
-    con.Database := 'postgres';
-    con.User := 'postgres';
-    con.Password := 'postgres';
+    con.Driver := 'sqlite3';
+    con.Database := '../data.sqlite3';
     con.Connect;
 
     qry.SQL.Text := 'delete from person';

@@ -59,7 +59,7 @@
         <UsageCount Value="20"/>
       </Unit1>
       <Unit2>
-        <Filename Value="dbutils.pas"/>
+        <Filename Value="..\dbutils.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="dbutils"/>
         <UsageCount Value="20"/>
@@ -74,6 +74,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value=".."/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>

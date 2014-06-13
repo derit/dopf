@@ -5,7 +5,7 @@ unit dbutils;
 interface
 
 uses
-  dSQLdbBroker, PQConnection, SysUtils;
+  dSQLdbBroker, sqlite3conn, SysUtils;
 
 function con: TdSQLdbConnector;
 
@@ -21,11 +21,8 @@ begin
     _con := TdSQLdbConnector.Create(nil);
     _con.Logger.Active := True;
     _con.Logger.FileName := 'OUTPUT.LOG';
-    _con.Driver := 'postgresql';
-    _con.Host := '127.0.0.1';
-    _con.Database := 'postgres';
-    _con.User := 'postgres';
-    _con.Password := 'postgres';
+    _con.Driver := 'sqlite3';
+    _con.Database := '../../data.sqlite3';
   end;
   Result := _con;
 end;
