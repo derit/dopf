@@ -66,6 +66,8 @@ type
 
   TdSQLdbQueryBroker = class(TdQueryBroker)
   private
+    FNulls: Boolean;
+    FUseUtf8: Boolean;
     FCon: TSQLConnector;
     FQuery: TSQLQuery;
   protected
@@ -82,10 +84,14 @@ type
     function GetPosition: Int64; override;
     function GetSQL: TStrings; override;
     function GetState: TDataSetState; override;
+    function GetNulls: Boolean; override;
+    function GetUseUtf8: Boolean; override;
     procedure SetActive(const AValue: Boolean); override;
     procedure SetConnection(AValue: TObject); override;
     procedure SetDataSource(AValue: TDataSource); override;
     procedure SetPosition(const AValue: Int64); override;
+    procedure SetNulls(const AValue: Boolean); override;
+    procedure SetUseUtf8(const AValue: Boolean); override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -359,6 +365,16 @@ begin
   Result := FQuery.State;
 end;
 
+function TdSQLdbQueryBroker.GetNulls: Boolean;
+begin
+  Result := FNulls;
+end;
+
+function TdSQLdbQueryBroker.GetUseUtf8: Boolean;
+begin
+  Result := FUseUtf8;
+end;
+
 procedure TdSQLdbQueryBroker.SetActive(const AValue: Boolean);
 begin
   FQuery.Active := AValue;
@@ -388,6 +404,16 @@ end;
 procedure TdSQLdbQueryBroker.SetPosition(const AValue: Int64);
 begin
   FQuery.RecNo := AValue;
+end;
+
+procedure TdSQLdbQueryBroker.SetNulls(const AValue: Boolean);
+begin
+  FNulls := AValue;
+end;
+
+procedure TdSQLdbQueryBroker.SetUseUtf8(const AValue: Boolean);
+begin
+  FUseUtf8 := AValue;
 end;
 
 procedure TdSQLdbQueryBroker.ApplyUpdates;

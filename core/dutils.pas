@@ -37,17 +37,19 @@ const
 procedure dParameterizeSQL(var ASql: string; AParams: TParams;
   const ANulls: Boolean = False);
 procedure dGetFields(AObject: TObject; AFields: TFields;
-  const ANulls: Boolean = False);
+  const ANulls: Boolean = False; const AUseUtf8: Boolean = False);
 procedure dSetFields(APropList: PPropList; const APropCount: Integer;
-  AObject: TObject; AFields: TFields; const ANulls: Boolean = False); overload;
+  AObject: TObject; AFields: TFields; const ANulls: Boolean = False;
+  const AUseUtf8: Boolean = False); overload;
 procedure dSetFields(AObject: TObject; AFields: TFields;
-  const ANulls: Boolean = False); overload;
+  const ANulls: Boolean = False; const AUseUtf8: Boolean = False); overload;
 procedure dGetParams(AObject: TObject; AParams: TParams;
-  const ANulls: Boolean = False);
+  const ANulls: Boolean = False; const AUseUtf8: Boolean = False);
 procedure dSetParams(APropList: PPropList; const APropCount: Integer;
-  AObject: TObject; AParams: TParams; const ANulls: Boolean = False); overload;
+  AObject: TObject; AParams: TParams; const ANulls: Boolean = False;
+  const AUseUtf8: Boolean = False); overload;
 procedure dSetParams(AObject: TObject; AParams: TParams;
-  const ANulls: Boolean = False); overload;
+  const ANulls: Boolean = False; const AUseUtf8: Boolean = False); overload;
 
 implementation
 
@@ -112,7 +114,8 @@ begin
     end;
 end;
 
-procedure dGetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
+procedure dGetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean;
+  const AUseUtf8: Boolean);
 var
   I: Integer;
   F: TField;
@@ -131,10 +134,20 @@ begin
         Continue;
       case PI^.PropType^.Kind of
         tkAString:
-          if F.IsNull then
-            SetStrProp(AObject, PI, dNullStr)
+          if AUseUtf8 then
+          begin
+            if F.IsNull then
+              SetStrProp(AObject, PI, dNullStr)
+            else
+              SetStrProp(AObject, PI, UTF8Encode(F.AsString));
+          end
           else
-            SetStrProp(AObject, PI, F.AsString);
+          begin
+            if F.IsNull then
+              SetStrProp(AObject, PI, dNullStr)
+            else
+              SetStrProp(AObject, PI, F.AsString);
+          end;
         tkChar:
           if F.IsNull then
             SetOrdProp(AObject, PI, Ord(dNullChar))
@@ -198,7 +211,11 @@ begin
       if not Assigned(PI) then
         Continue;
       case PI^.PropType^.Kind of
-        tkAString: SetStrProp(AObject, PI, F.AsString);
+        tkAString:
+          if AUseUtf8 then
+            SetStrProp(AObject, PI, UTF8Encode(F.AsString))
+          else
+            SetStrProp(AObject, PI, F.AsString);
         tkChar: SetOrdProp(AObject, PI, Ord(PChar(F.AsString)^));
         tkInteger: SetOrdProp(AObject, PI, F.AsInteger);
         tkInt64, tkQWord: SetInt64Prop(AObject, PI, F.AsLargeInt);
@@ -218,7 +235,8 @@ begin
 end;
 
 procedure dSetFields(APropList: PPropList; const APropCount: Integer;
-  AObject: TObject; AFields: TFields; const ANulls: Boolean);
+  AObject: TObject; AFields: TFields; const ANulls: Boolean;
+  const AUseUtf8: Boolean);
 var
   F: TField;
   I: Integer;
@@ -243,6 +261,13 @@ begin
         Continue;
       case PI^.PropType^.Kind of
         tkAString:
+          if AUseUtf8 then
+          begin
+            F.AsString := UTF8Decode(GetStrProp(AObject, PI));
+            if F.AsString = dNullStr then
+              F.Clear;
+          end
+          else
           begin
             F.AsString := GetStrProp(AObject, PI);
             if F.AsString = dNullStr then
@@ -319,7 +344,11 @@ begin
       if not Assigned(F) then
         Continue;
       case PI^.PropType^.Kind of
-        tkAString: F.AsString := GetStrProp(AObject, PI);
+        tkAString:
+          if AUseUtf8 then
+            F.AsString := UTF8Decode(GetStrProp(AObject, PI))
+          else
+            F.AsString := GetStrProp(AObject, PI);
         tkChar: F.AsString := Char(GetOrdProp(AObject, PI));
         tkInteger: F.AsInteger := GetOrdProp(AObject, PI);
         tkInt64, tkQWord: F.AsLargeInt := GetInt64Prop(AObject, PI);
@@ -338,7 +367,8 @@ begin
     end;
 end;
 
-procedure dSetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean);
+procedure dSetFields(AObject: TObject; AFields: TFields; const ANulls: Boolean;
+  const AUseUtf8: Boolean);
 var
   C: Integer;
   PL: PPropList = nil;
@@ -348,13 +378,14 @@ begin
   C := GetPropList(PTypeInfo(AObject.ClassInfo), PL);
   if Assigned(PL) then
     try
-      dUtils.dSetFields(PL, C, AObject, AFields, ANulls);
+      dUtils.dSetFields(PL, C, AObject, AFields, ANulls, AUseUtf8);
     finally
       FreeMem(PL);
     end;
 end;
 
-procedure dGetParams(AObject: TObject; AParams: TParams; const ANulls: Boolean);
+procedure dGetParams(AObject: TObject; AParams: TParams; const ANulls: Boolean;
+  const AUseUtf8: Boolean);
 var
   I: Integer;
   P: TParam;
@@ -373,10 +404,20 @@ begin
         Continue;
       case PI^.PropType^.Kind of
         tkAString:
-          if P.IsNull then
-            SetStrProp(AObject, PI, dNullStr)
+          if AUseUtf8 then
+          begin
+            if P.IsNull then
+              SetStrProp(AObject, PI, dNullStr)
+            else
+              SetStrProp(AObject, PI, UTF8Encode(P.AsString));
+          end
           else
-            SetStrProp(AObject, PI, P.AsString);
+          begin
+            if P.IsNull then
+              SetStrProp(AObject, PI, dNullStr)
+            else
+              SetStrProp(AObject, PI, P.AsString);
+          end;
         tkChar:
           if P.IsNull then
             SetOrdProp(AObject, PI, Ord(dNullChar))
@@ -440,7 +481,11 @@ begin
       if not Assigned(PI) then
         Continue;
       case PI^.PropType^.Kind of
-        tkAString: SetStrProp(AObject, PI, P.AsString);
+        tkAString:
+          if AUseUtf8 then
+            SetStrProp(AObject, PI, UTF8Encode(P.AsString))
+          else
+            SetStrProp(AObject, PI, P.AsString);
         tkChar: SetOrdProp(AObject, PI, Ord(PChar(P.AsString)^));
         tkInteger: SetOrdProp(AObject, PI, P.AsInteger);
         tkInt64, tkQWord: SetInt64Prop(AObject, PI, P.AsLargeInt);
@@ -460,7 +505,8 @@ begin
 end;
 
 procedure dSetParams(APropList: PPropList; const APropCount: Integer;
-  AObject: TObject; AParams: TParams; const ANulls: Boolean);
+  AObject: TObject; AParams: TParams; const ANulls: Boolean;
+  const AUseUtf8: Boolean);
 var
   P: TParam;
   I: Integer;
@@ -485,6 +531,13 @@ begin
         Continue;
       case PI^.PropType^.Kind of
         tkAString:
+          if AUseUtf8 then
+          begin
+            P.AsString := UTF8Decode(GetStrProp(AObject, PI));
+            if P.AsString = dNullStr then
+              P.Clear;
+          end
+          else
           begin
             P.AsString := GetStrProp(AObject, PI);
             if P.AsString = dNullStr then
@@ -561,7 +614,11 @@ begin
       if not Assigned(P) then
         Continue;
       case PI^.PropType^.Kind of
-        tkAString: P.AsString := GetStrProp(AObject, PI);
+        tkAString:
+          if AUseUtf8 then
+            P.AsString := UTF8Decode(GetStrProp(AObject, PI))
+          else
+            P.AsString := GetStrProp(AObject, PI);
         tkChar: P.AsString := Char(GetOrdProp(AObject, PI));
         tkInteger: P.AsInteger := GetOrdProp(AObject, PI);
         tkInt64, tkQWord: P.AsLargeInt := GetInt64Prop(AObject, PI);
@@ -580,7 +637,8 @@ begin
     end;
 end;
 
-procedure dSetParams(AObject: TObject; AParams: TParams; const ANulls: Boolean);
+procedure dSetParams(AObject: TObject; AParams: TParams; const ANulls: Boolean;
+  const AUseUtf8: Boolean);
 var
   C: Integer;
   PL: PPropList = nil;
@@ -590,7 +648,7 @@ begin
   C := GetPropList(PTypeInfo(AObject.ClassInfo), PL);
   if Assigned(PL) then
     try
-      dUtils.dSetParams(PL, C, AObject, AParams, ANulls);
+      dUtils.dSetParams(PL, C, AObject, AParams, ANulls, AUseUtf8);
     finally
       FreeMem(PL);
     end;

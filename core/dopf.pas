@@ -173,10 +173,14 @@ type
     function GetPosition: Int64; virtual;
     function GetSQL: TStrings; virtual;
     function GetState: TDataSetState; virtual;
+    function GetNulls: Boolean; virtual;
+    function GetUseUtf8: Boolean; virtual;
     procedure SetActive({%H-}const AValue: Boolean); virtual;
     procedure SetConnection({%H-}AValue: TObject); virtual;
     procedure SetDataSource({%H-}AValue: TDataSource); virtual;
     procedure SetPosition({%H-}const AValue: Int64); virtual;
+    procedure SetNulls({%H-}const AValue: Boolean); virtual;
+    procedure SetUseUtf8({%H-}const AValue: Boolean); virtual;
   public
     constructor Create; virtual;
     procedure ApplyUpdates; virtual;
@@ -226,6 +230,8 @@ type
     property FieldDefs: TFieldDefs read GetFieldDefs;
     property DataSource: TDataSource read GetDataSource write SetDataSource;
     property Connection: TObject read GetConnection write SetConnection;
+    property Nulls: Boolean read GetNulls write SetNulls;
+    property UseUtf8: Boolean read GetUseUtf8 write SetUseUtf8;
   end;
 
   { TdGQuery }
@@ -234,7 +240,6 @@ type
   private
     FBroker: T1;
     FConnection: T2;
-    FNulls: Boolean;
     function GetActive: Boolean;
     function GetBOF: Boolean;
     function GetDataSet: TDataSet;
@@ -243,13 +248,17 @@ type
     function GetFieldDefs: TFieldDefs;
     function GetFields: TFields;
     function GetModified: Boolean;
+    function GetNulls: Boolean;
     function GetParams: TParams;
     function GetPosition: Int64;
     function GetSQL: TStrings;
     function GetState: TDataSetState;
+    function GetUseUtf8: Boolean;
     procedure SetActive(const AValue: Boolean);
     procedure SetDataSource(AValue: TDataSource);
+    procedure SetNulls(const AValue: Boolean);
     procedure SetPosition(const AValue: Int64);
+    procedure SetUseUtf8(const AValue: Boolean);
   protected
     procedure CheckConnection; virtual;
     procedure CheckBrokerClass; virtual;
@@ -296,7 +305,7 @@ type
     procedure AddSql(const ASql: string);
     property Connection: T2 read FConnection write FConnection;
     property Broker: T1 read FBroker write FBroker;
-    property Nulls: Boolean read FNulls write FNulls;
+    property Nulls: Boolean read GetNulls write SetNulls;
     property SQL: TStrings read GetSQL;
     property Fields: TFields read GetFields;
     property FieldDefs: TFieldDefs read GetFieldDefs;
@@ -310,6 +319,7 @@ type
     property DataSet: TDataSet read GetDataSet;
     property DataSource: TDataSource read GetDataSource write SetDataSource;
     property Position: Int64 read GetPosition write SetPosition;
+    property UseUtf8: Boolean read GetUseUtf8 write SetUseUtf8;
   end;
 
   { TdGEntityQuery }
@@ -348,7 +358,9 @@ type
     FTable: TTable;
     FUpdateKind: TdOpfUpdateKind;
     function GetNulls: Boolean;
+    function GetUseUtf8: Boolean;
     procedure SetNulls(const AValue: Boolean);
+    procedure SetUseUtf8(const AValue: Boolean);
   protected
     function CreateTable: TTable; virtual;
     procedure FreeTable; virtual;
@@ -398,6 +410,7 @@ type
     property Query: T2 read FQuery;
     property Table: TTable read FTable write FTable;
     property Nulls: Boolean read GetNulls write SetNulls;
+    property UseUtf8: Boolean read GetUseUtf8 write SetUseUtf8;
     property UpdateKind: TdOpfUpdateKind read FUpdateKind;
     property OnUpdating: TNotifyEvent read FOnUpdating write FOnUpdating;
     property OnUpdated: TNotifyEvent read FOnUpdated write FOnUpdated;
@@ -1062,6 +1075,18 @@ begin
   NotImplementedError;
 end;
 
+function TdQueryBroker.GetUseUtf8: Boolean;
+begin
+  Result := False;
+  NotImplementedError;
+end;
+
+function TdQueryBroker.GetNulls: Boolean;
+begin
+  Result := False;
+  NotImplementedError;
+end;
+
 function TdQueryBroker.GetActive: Boolean;
 begin
   Result := False;
@@ -1154,6 +1179,16 @@ begin
   NotImplementedError;
 end;
 
+procedure TdQueryBroker.SetNulls(const AValue: Boolean);
+begin
+  NotImplementedError;
+end;
+
+procedure TdQueryBroker.SetUseUtf8(const AValue: Boolean);
+begin
+  NotImplementedError;
+end;
+
 { TdGQuery }
 
 constructor TdGQuery.Create(AOwner: TComponent);
@@ -1176,7 +1211,7 @@ procedure TdGQuery.GetFields(AEntity: TObject);
 begin
   Connection.Logger.Log(ltCustom, 'Trying Query.GetFields');
   try
-    dUtils.dGetFields(AEntity, Fields, FNulls);
+    dUtils.dGetFields(AEntity, Fields, Nulls, UseUtf8);
   except
     on E: Exception do
     begin
@@ -1190,7 +1225,7 @@ procedure TdGQuery.SetFields(AEntity: TObject);
 begin
   Connection.Logger.Log(ltCustom, 'Trying Query.SetFields');
   try
-    dUtils.dSetFields(AEntity, Fields, FNulls);
+    dUtils.dSetFields(AEntity, Fields, Nulls, UseUtf8);
   except
     on E: Exception do
     begin
@@ -1204,7 +1239,7 @@ procedure TdGQuery.GetParams(AEntity: TObject);
 begin
   Connection.Logger.Log(ltCustom, 'Trying Query.GetParams');
   try
-    dUtils.dGetParams(AEntity, Params, FNulls);
+    dUtils.dGetParams(AEntity, Params, Nulls, UseUtf8);
   except
     on E: Exception do
     begin
@@ -1218,7 +1253,7 @@ procedure TdGQuery.SetParams(AEntity: TObject);
 begin
   Connection.Logger.Log(ltCustom, 'Trying Query.SetParams');
   try
-    dUtils.dSetParams(AEntity, Params, FNulls);
+    dUtils.dSetParams(AEntity, Params, Nulls, UseUtf8);
   except
     on E: Exception do
     begin
@@ -1294,6 +1329,12 @@ begin
   Result := FBroker.Modified;
 end;
 
+function TdGQuery.GetNulls: Boolean;
+begin
+  CheckBroker;
+  Result := FBroker.Nulls;
+end;
+
 function TdGQuery.GetParams: TParams;
 begin
   CheckBroker;
@@ -1318,6 +1359,12 @@ begin
   Result := FBroker.State;
 end;
 
+function TdGQuery.GetUseUtf8: Boolean;
+begin
+  CheckBroker;
+  Result := FBroker.UseUtf8;
+end;
+
 procedure TdGQuery.SetActive(const AValue: Boolean);
 begin
   CheckBroker;
@@ -1330,10 +1377,22 @@ begin
   FBroker.DataSource := AValue;
 end;
 
+procedure TdGQuery.SetNulls(const AValue: Boolean);
+begin
+  CheckBroker;
+  FBroker.Nulls := AValue;
+end;
+
 procedure TdGQuery.SetPosition(const AValue: Int64);
 begin
   CheckBroker;
   FBroker.Position := AValue;
+end;
+
+procedure TdGQuery.SetUseUtf8(const AValue: Boolean);
+begin
+  CheckBroker;
+  FBroker.UseUtf8 := AValue;
 end;
 
 procedure TdGQuery.ApplyUpdates;
@@ -1501,7 +1560,7 @@ begin
   CheckBroker;
   CheckConnection;
   S := Trim(SQL.Text);
-  dUtils.dParameterizeSQL(S, Params, FNulls);
+  dUtils.dParameterizeSQL(S, Params, Nulls);
   Connection.Logger.Log(ltSQL, 'Trying Query.Open: ' + S);
   try
     FBroker.Open;
@@ -1563,7 +1622,7 @@ begin
   CheckBroker;
   CheckConnection;
   S := Trim(SQL.Text);
-  dUtils.dParameterizeSQL(S, Params, FNulls);
+  dUtils.dParameterizeSQL(S, Params, Nulls);
   Connection.Logger.Log(ltSQL, 'Trying Query.Execute: ' + S);
   try
     FBroker.Execute;
@@ -1705,9 +1764,19 @@ begin
   Result := FQuery.Nulls;
 end;
 
+function TdGOpf.GetUseUtf8: Boolean;
+begin
+  Result := FQuery.UseUtf8;
+end;
+
 procedure TdGOpf.SetNulls(const AValue: Boolean);
 begin
   FQuery.Nulls := AValue;
+end;
+
+procedure TdGOpf.SetUseUtf8(const AValue: Boolean);
+begin
+  FQuery.UseUtf8 := AValue;
 end;
 
 function TdGOpf.CreateTable: TTable;
@@ -1820,12 +1889,12 @@ end;
 procedure TdGOpf.SetParams(AEntity: TObject);
 begin
   dUtils.dSetParams(FTable.PropList, FTable.PropCount, AEntity, FQuery.Params,
-    FQuery.Nulls);
+    FQuery.Nulls, FQuery.UseUtf8);
 end;
 
 procedure TdGOpf.GetFields(AEntity: TObject);
 begin
-  dUtils.dGetFields(AEntity, FQuery.Fields, FQuery.Nulls);
+  dUtils.dGetFields(AEntity, FQuery.Fields, FQuery.Nulls, FQuery.UseUtf8);
 end;
 
 function TdGOpf.Get(AEntity: T3; const AFillingObjectFilter: Boolean): Boolean;
@@ -1871,7 +1940,7 @@ begin
     SetSql(ASql);
   SetParams(AEntity);
   if Assigned(AParams) then
-    dUtils.dSetParams(AParams, FQuery.Params, FQuery.Nulls);
+    dUtils.dSetParams(AParams, FQuery.Params, FQuery.Nulls, FQuery.UseUtf8);
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
@@ -1897,7 +1966,7 @@ begin
   else
     SetSql(ASql);
   if Assigned(AParams) then
-    dUtils.dSetParams(AParams, FQuery.Params, FQuery.Nulls);
+    dUtils.dSetParams(AParams, FQuery.Params, FQuery.Nulls, FQuery.UseUtf8);
   FQuery.Open;
   Result := FQuery.Count > 0;
   if Result then
