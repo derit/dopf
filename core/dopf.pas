@@ -1755,6 +1755,7 @@ end;
 
 destructor TdGOpf.Destroy;
 begin
+  FQuery.Free;
   FreeTable;
   inherited Destroy;
 end;
