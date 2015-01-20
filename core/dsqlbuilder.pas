@@ -136,8 +136,7 @@ begin
     Exit;
   if AValue <> FName then
   begin
-    FName := AValue;
-    StrLower(PChar(FName));
+    FName := LowerCase(AValue);
   end;
 end;
 
@@ -179,7 +178,7 @@ begin
     AFields += N;
   end;
   SetLength(AFields, Length(AFields) - 2);
-  StrLower(PChar(AFields));
+  AFields := LowerCase(AFields);
 end;
 
 procedure TdGSelectBuilder.Build(out ASql: string;
@@ -219,8 +218,8 @@ begin
   end;
   SetLength(AFields, Length(AFields) - 2);
   SetLength(AParams, Length(AParams) - 2);
-  StrLower(PChar(AFields));
-  StrLower(PChar(AParams));
+  AFields := LowerCase(AFields);
+  AParams := LowerCase(AParams);
 end;
 
 procedure TdGInsertBuilder.Build(out ASql: string;
@@ -265,9 +264,9 @@ begin
     AFields += N + ' = :' + N + ', ';
   end;
   SetLength(AFields, Length(AFields) - 2);
-  StrLower(PChar(AFields));
+  AFields := LowerCase(AFields);
   SetLength(AParams, Length(AParams) - 5);
-  StrLower(PChar(AParams));
+  AParams := LowerCase(AParams);
 end;
 
 procedure TdGUpdateBuilder.Build(out ASql: string;
@@ -312,7 +311,7 @@ begin
     end;
   end;
   SetLength(AParams, Length(AParams) - 5);
-  StrLower(PChar(AParams));
+  AParams := LowerCase(AParams);
 end;
 
 procedure TdGDeleteBuilder.Build(out ASql: string;
