@@ -80,6 +80,7 @@ type
     function GetPassword: string; virtual;
     function GetPort: Integer; virtual;
     function GetUser: string; virtual;
+    function GetConnectorType: string; virtual;
     procedure SetConnected({%H-}const AValue: Boolean); virtual;
     procedure SetDatabase({%H-}const AValue: string); virtual;
     procedure SetDriver({%H-}const AValue: string); virtual;
@@ -87,6 +88,7 @@ type
     procedure SetPassword({%H-}const AValue: string); virtual;
     procedure SetPort({%H-}const AValue: Integer); virtual;
     procedure SetUser({%H-}const AValue: string); virtual;
+    procedure SetConnectorType({%H-}const AValue: string); virtual;
   public
     constructor Create; virtual;
     procedure Connect; virtual;
@@ -107,6 +109,7 @@ type
     property Password: string read GetPassword write SetPassword;
     property Host: string read GetHost write SetHost;
     property Port: Integer read GetPort write SetPort;
+    property ConnectorType: string read GetConnectorType write SetConnectorType;
   end;
 
   { TdGConnection }
@@ -122,6 +125,7 @@ type
     function GetPassword: string;
     function GetPort: Integer;
     function GetUser: string;
+    function GetConnectorType: string;
     procedure SetConnected(const AValue: Boolean);
     procedure SetDatabase(const AValue: string);
     procedure SetDriver(const AValue: string);
@@ -129,6 +133,7 @@ type
     procedure SetPassword(const AValue: string);
     procedure SetPort(const AValue: Integer);
     procedure SetUser(const AValue: string);
+    procedure SetConnectorType(const AValue: string);
   protected
     procedure CheckBrokerClass; virtual;
     procedure CheckBroker; virtual;
@@ -154,6 +159,7 @@ type
     property Password: string read GetPassword write SetPassword;
     property Host: string read GetHost write SetHost;
     property Port: Integer read GetPort write SetPort;
+    property ConnectorType:string read GetConnectorType write SetConnectorType;
   end;
 
   { TdQueryBroker }
@@ -632,6 +638,12 @@ begin
   NotImplementedError;
 end;
 
+function TdConnectionBroker.GetConnectorType: string;
+begin
+  Result := '';
+  NotImplementedError;
+end;
+
 procedure TdConnectionBroker.SetConnected(const AValue: Boolean);
 begin
   NotImplementedError;
@@ -663,6 +675,11 @@ begin
 end;
 
 procedure TdConnectionBroker.SetUser(const AValue: string);
+begin
+  NotImplementedError;
+end;
+
+procedure TdConnectionBroker.SetConnectorType(const AValue: string);
 begin
   NotImplementedError;
 end;
@@ -745,6 +762,12 @@ begin
   Result := FBroker.User;
 end;
 
+function TdGConnection.GetConnectorType: string;
+begin
+  CheckBroker;
+  Result := FBroker.ConnectorType;
+end;
+
 procedure TdGConnection.SetConnected(const AValue: Boolean);
 begin
   CheckBroker;
@@ -785,6 +808,12 @@ procedure TdGConnection.SetUser(const AValue: string);
 begin
   CheckBroker;
   FBroker.User := AValue;
+end;
+
+procedure TdGConnection.SetConnectorType(const AValue: string);
+begin
+  CheckBroker;
+  FBroker.ConnectorType := AValue;
 end;
 
 procedure TdGConnection.Connect;

@@ -37,6 +37,7 @@ type
     function GetPassword: string; override;
     function GetPort: Integer; override;
     function GetUser: string; override;
+    function GetConnectorType: string; override;
     procedure SetConnected(const AValue: Boolean); override;
     procedure SetDatabase(const AValue: string); override;
     procedure SetDriver(const AValue: string); override;
@@ -44,6 +45,7 @@ type
     procedure SetPassword(const AValue: string); override;
     procedure SetPort(const AValue: Integer); override;
     procedure SetUser(const AValue: string); override;
+    procedure SetConnectorType(const AValue: String); override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -251,6 +253,11 @@ begin
   Result := FCon.UserName;
 end;
 
+function TdSQLdbConnectionBroker.GetConnectorType: string;
+begin
+  Result := FCon.ConnectorType;
+end;
+
 procedure TdSQLdbConnectionBroker.SetConnected(const AValue: Boolean);
 begin
   FCon.Connected := AValue;
@@ -284,6 +291,11 @@ end;
 procedure TdSQLdbConnectionBroker.SetUser(const AValue: string);
 begin
   FCon.UserName := AValue;
+end;
+
+procedure TdSQLdbConnectionBroker.SetConnectorType(const AValue: String);
+begin
+  FCon.ConnectorType := AValue;
 end;
 
 { TdSQLdbQueryBroker }
